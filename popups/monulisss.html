@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+    <title>Liste avec Checkbox</title>
+</head>
+<body  class="bg-light">
+    <div class="container-fluid p-3" id="maincontent" style="display:none;">
+
+        <div class="row align-items-center border-bottom">
+            <div class="col-8 pb-3 border-end">
+                <div id="me_firstname" class="display-3 text-end"></div>
+                <div id="me_lastname" class="display-3 text-end"></div>
+            </div>
+            <div class="col">
+                <div class="text-center align-middle">
+                    <div id="me_ratio" style="font-size: 3rem;"></div>
+                    <div id="me_month" class="text-mini"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col">  
+                <h2>Mes calendriers</h2>
+
+                <select id="calendarselector" class="form-select mb-3" aria-label="sélection du groupe de calendrier">
+                </select>
+
+                <select id="timeselector" class="form-select" aria-label="sélection du mois">
+                </select>
+
+                <table class="table table-striped table-sm caption-top mt-3">
+                    <thead>
+                        <tr>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Ulis</th>
+                            <th scope="col">Jours de travail</th>
+                            <th scope="col">TT</th>
+                            <th scope="col">Présences</th>
+                            <th scope="col">Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarDetails">
+                    </tbody>
+                </table>
+
+                <!-- <button type="button" class="btn btn-primary" id="downloadbutton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                    <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                    <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                </svg> Détails en CSV</button> -->
+                <ul>
+                    <li>Jour de travail = hors maladie, congés et récup et fermetures</li>
+                    <li>Présence en cas de pointage, présentiel ou mission</li>
+                    <li>Les taux sont calculés sur les données récupérées de l'API Ulis avec vos droits. Ils peuvent donc être incorrects sur des calendriers (🔒privés) auxquels vous n'avez pas accès.</li>
+                </ul>   
+            </div>
+        </div>
+
+    </div>
+
+    <div id="errormessage" class="p-3" style="display:none;">
+        <p>Vous devez vous trouver sur la page de MyUlis pour utiliser ce plugin et avoir donné les autorisations nécessaires.</p>
+        <p id="errormessagecontent" class="font-italic"></p>
+        <a class="btn btn-primary" href="https://myulis.etnic.be">Me connecter à Myulis Etnic</a>
+    </div>
+
+    <div id="loader" class="p-3">
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-top p-3 mt-1">
+        <em>Plugin en cours de développement <span class="text-primary">version 0.7-alpha</span> > julian.davreux@etnic.be</em>
+    </footer>
+    
+    <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/scripts/monulisss.js" type="module"></script>
+    
+</body>
+</html>
