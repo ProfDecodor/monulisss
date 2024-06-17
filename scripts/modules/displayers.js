@@ -279,6 +279,13 @@ export function handleDownloadButton(calendarDetails) {
 
     console.log(data);
 
+    DOM_DownloadButton.addEventListener("click", function (e) {
+        createCsvFile(data);
+    });
+
+}
+
+function createCsvFile(data) {
     const csvArray = [];
     const csvHeader = ["matricule", "nom", ""]; // la colonne vide est intentionnelle
 
