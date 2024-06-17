@@ -1,22 +1,20 @@
 /**
- * 
+ *
  * @module Displayers
  * Ensemble des fonctions qui font de l'affichage ou interragissent avec le contenu du DOM
- * 
- * 
+ *
+ *
  */
 
 
 // éléments html
 const DOM_CalendarDetailsTable = document.getElementById("calendarDetails");
-const DOM_StartDate = document.getElementById("startdate");
-const DOM_EndDate = document.getElementById("enddate");
-const DOM_NumberOfDays = document.getElementById("numberofdays");
 const DOM_DownloadButton = document.getElementById("downloadbutton");
 const DOM_ContainerMain = document.getElementById("maincontent");
 const DOM_ContainerError = document.getElementById("errormessage");
 const DOM_ContainerLoader = document.getElementById("loader");
 const DOM_MyUlisLink = document.getElementById("myUlisLink");
+//const DOM_PreferencesLink = document.getElementById("preferenceslink");
 const DOM_DateSelector = document.getElementById("timeselector");
 const DOM_CalendarSelector = document.getElementById("calendarselector");
 const DOM_MeFirstname = document.getElementById("me_firstname");
@@ -38,12 +36,12 @@ export function hideLoading() {
     DOM_ContainerMain.style.display = "block";
 }
 
-/** 
+/**
  * Affiche le bloc qui explique que le plugin n'est pas utilisable
  * Peut prenre un message d'erreur en paramètre
  */
 export function showNotAccessibleMessage(errorMessage = "") {
-    
+
     if (errorMessage.length) {
         DOM_ErrorMessageContent.textContent = errorMessage;
     }
@@ -54,6 +52,12 @@ export function showNotAccessibleMessage(errorMessage = "") {
     DOM_ContainerError.style.display = "block";
     DOM_ContainerLoader.style.display = "none";
     DOM_ContainerMain.style.display = "none";
+
+    /*DOM_PreferencesLink.onclick = function (event) {
+        event.preventDefault();
+        let sending = browser.runtime.sendMessage({"message": "open_addon_preferences"});
+
+    }*/
 
 }
 
@@ -78,11 +82,11 @@ export function prepareDateSelector() {
     let monthMinus0 = new Date(today.getFullYear(), today.getMonth());
     let monthMinus1 = new Date(today.getFullYear(), today.getMonth() - 1);
     let monthMinus2 = new Date(today.getFullYear(), today.getMonth() - 2);
-      
+
     addDateOption(DOM_DateSelector, "month-0", "Ce mois ("+monthMinus0.toLocaleString('default', { month: 'long' })+")");
     addDateOption(DOM_DateSelector, "month-1", monthMinus1.toLocaleString('default', { month: 'long' }));
     addDateOption(DOM_DateSelector, "month-2", monthMinus2.toLocaleString('default', { month: 'long' }));
-      
+
     // Sélection par défaut de l'option "ceMois"
     DOM_DateSelector.value = "month-0";
 
@@ -93,13 +97,18 @@ export function prepareDateSelector() {
 
 /**
  * Récupère la date sélectionnée dans le sélecteur de date
+ * si on passe un true en param, on obtient uniquement la value du select. sinon, on récpère les date
  * @returns un tableau contenant la date de début et la date de fin
  */
-export function getSelectedDates() {
+export function getSelectedDates(onlyValue=false) {
+
+    if (onlyValue) {
+        return (DOM_DateSelector.value);
+    }
 
     let today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    let selectedDate = DOM_DateSelector.value; 
+    let selectedDate = DOM_DateSelector.value;
 
     let startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
     let endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()-1));
@@ -123,6 +132,14 @@ export function getSelectedDates() {
 
     return [startDate, endDate];
 
+}
+
+/**
+ * changer la valeur du select
+ * @param value
+ */
+export function selectDates(value) {
+    DOM_DateSelector.value = value;
 }
 
 /**
@@ -153,7 +170,7 @@ export function prepareCalendarSelector(calendarList) {
     }
 
     calendarList.forEach(addCalendarOption);
-    
+
     return DOM_CalendarSelector;
 
 }
@@ -168,6 +185,14 @@ export function getSelectedCalendar() {
 
 }
 
+/**
+ * changer la valeur du select
+ * @param value
+ */
+export function selectCalendar(value) {
+    DOM_CalendarSelector.value = value;
+}
+
 
 /**
  * Affiche le calendrier sélectionné sous forme de table
@@ -179,30 +204,30 @@ export function displayCalendarTable(calendarDetails) {
     while (DOM_CalendarDetailsTable.firstChild) {
         DOM_CalendarDetailsTable.removeChild(DOM_CalendarDetailsTable.firstChild);
     }
-    
+
     calendarDetails.getPeople().forEach((name, permat) => {
 
         const row = document.createElement("tr");
-        
+
         const nameCell = document.createElement("td");
         nameCell.textContent = name;
         row.appendChild(nameCell);
-        
+
         const permatCell = document.createElement("td");
         permatCell.textContent = permat;
         row.appendChild(permatCell);
-        
+
         const workingDaysCell = document.createElement("td");
         let countWorkingDays =  calendarDetails.getWorkingDays(permat);
         let invalidActivities = calendarDetails.getInvalidActivities(permat);
         if (invalidActivities > 1) {
-            workingDaysCell.innerHTML = countWorkingDays 
+            workingDaysCell.innerHTML = countWorkingDays
                                             + ' <span class="small text-danger">'
                                             + invalidActivities
                                             + ' pointages invalides</span>';
         }
         else if (invalidActivities > 0) {
-            workingDaysCell.innerHTML = countWorkingDays 
+            workingDaysCell.innerHTML = countWorkingDays
                                             + ' <span class="small text-danger">'
                                             + invalidActivities
                                             + ' pointage invalide</span>';
@@ -239,9 +264,90 @@ export function displayCalendarTable(calendarDetails) {
 
         DOM_CalendarDetailsTable.appendChild(row);
 
-
     });
 
+}
+
+
+/**
+ * Gère le clic sur le bouton de download
+ * @returns {null}
+ */
+export function handleDownloadButton(calendarDetails) {
+
+    const data = calendarDetails.getExport();
+
+    console.log(data);
+
+    const csvArray = [];
+    const csvHeader = ["matricule", "nom", ""]; // la colonne vide est intentionnelle
+
+    if ( data.days[0] !== undefined ) {
+
+        /*
+            Ligne d'entete du CSV
+         */
+
+        for (let i=0; i<data.days.length; i++) {
+            csvHeader.push(data.days[i]);
+        }
+        csvArray.push(csvHeader);
+
+        /*
+            Boucle sur les personnes pour créer une ligne par personne
+         */
+        Object.entries(data.permats).forEach( permat => {
+            const [key, value] = permat;
+            let csvArrayLine = [];
+
+            // Prmeière ligne : les jours de fermeture
+            csvArrayLine = [key, value.name, "Fermetures"];
+            for (let i=0; i<data.days.length; i++) {
+                csvArrayLine.push(
+                    value.fermetures[data.days[i]] !== undefined ?
+                        value.fermetures[data.days[i]].join(",") : ""
+                );
+            }
+            csvArray.push(csvArrayLine);
+
+            // Deuxième ligne : les jours d'absences
+            csvArrayLine = [key, value.name, "Absences"];
+            for (let i=0; i<data.days.length; i++) {
+                csvArrayLine.push(
+                    value.absences[data.days[i]] !== undefined ?
+                        value.absences[data.days[i]].join(",") : ""
+                );
+            }
+            csvArray.push(csvArrayLine);
+
+            // Troisième ligne : les pointages
+            csvArrayLine = [key, value.name, "Pointages"];
+            for (let i=0; i<data.days.length; i++) {
+                csvArrayLine.push(
+                    value.pointages[data.days[i]] !== undefined ?
+                        value.pointages[data.days[i]].join(",") : ""
+                );
+            }
+            csvArray.push(csvArrayLine);
+
+        });
+
+        /*
+            Création du fichier
+         */
+
+        let content = csvArray.map(e => e.join(";")).join("\n");
+        const file = new File(["\ufeff"+content], 'export.csv', {type: "data:text/csv;charset=utf-8"});
+        const url = window.URL.createObjectURL(file);
+
+        const a = document.createElement("a");
+        a.style = "display: none";
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        return null;
+    }
 }
 
 
@@ -254,8 +360,8 @@ export function displayMe(me) {
 
 /**
  * TODO: contient du code redondant dans le calcul de ratio
- * @param {*} me 
- * @param {*} calendarDetails 
+ * @param {*} me
+ * @param {*} calendarDetails
  */
 export function displayPersonnalRatio(me, calendarDetails) {
 
@@ -264,21 +370,26 @@ export function displayPersonnalRatio(me, calendarDetails) {
     let countPresenceDays = calendarDetails.getPresenceDays(me.getPermat());
     let countWorkingDays = calendarDetails.getWorkingDays(me.getPermat())
 
+    DOM_MeRatio.classList.remove("text-danger");
+    DOM_MeRatio.classList.remove("text-warning");
+
     let ratio = Math.floor( (100 * countPresenceDays) / countWorkingDays);
     // si le nombre de jours de travail est à 0, on considère que le taux est à 100% (puisque aucune présence n'est nécessaireà)
     if (countWorkingDays == 0) {
         ratio = 100;
     }
     if (isNaN(ratio)) { ratio = 0; } // si getWorkingDay est à 0 --> division par 0 --> NaN
-        if (ratio < 40) {
-            DOM_MeRatio.classList.add("text-danger");
-        }
-        else if (ratio < 50) {
-            DOM_MeRatio.classList.add("text-warning");
-        }
-        DOM_MeRatio.innerHTML =  ratio + "%";
+    if (ratio < 40) {
+        DOM_MeRatio.classList.add("text-danger");
+    }
+    else if (ratio < 50) {
+        DOM_MeRatio.classList.add("text-warning");
+    }
+    DOM_MeRatio.innerHTML =  ratio + "%";
 
 }
+
+
 
 
 
@@ -299,9 +410,9 @@ function displayMyTeamTable(team, startDate, endDate) {
     //on fait le csv en meme temps
     const csvArray = [];
     const csvHeader = ["matricule", "nom"];
-    
+
     let currentDate = new Date(startDate.getTime());
-    
+
     while (currentDate <= endDate) {
         csvHeader.push(currentDate.toISOString().split('T')[0]);
         currentDate.setDate(currentDate.getDate() + 1);
@@ -318,11 +429,11 @@ function displayMyTeamTable(team, startDate, endDate) {
         const nameCell = document.createElement("td");
         nameCell.textContent = member.name;
         row.appendChild(nameCell);
-        
+
         const permatCell = document.createElement("td");
         permatCell.textContent = member.permat;
         row.appendChild(permatCell);
-        
+
         const workingDaysCell = document.createElement("td");
         workingDaysCell.textContent = team.getWorkingDays(member.permat);
         row.appendChild(workingDaysCell);
@@ -351,7 +462,7 @@ function displayMyTeamTable(team, startDate, endDate) {
 
         //html
         myTeamTable.appendChild(row);
-        
+
         //csv
         let currentDate = new Date(startDate.getTime());
         let memberEvents = [];
@@ -367,38 +478,6 @@ function displayMyTeamTable(team, startDate, endDate) {
     // on cree le lien de téléchargement
     DOMDownloadButton.addEventListener("click", function (e) { createCsvFile(csvArray)} );
 
-}
-
-
-function createCsvFile(array){
-        
-    content = array.map(e => e.join(";")).join("\n");
-    var file = new File(["\ufeff"+content], 'export.csv', {type: "data:text/csv;charset=utf-8"});
-    url = window.URL.createObjectURL(file);
-  
-    var a = document.createElement("a");
-    a.style = "display: none";
-    a.href = url;
-    a.download = file.name;
-    a.click();
-    window.URL.revokeObjectURL(url);
-} 
-
-
-function displayMyRatio(team, startDate, endDate) {
-
-    team.getMembers().forEach(member => { // on aura qu'un seul member dans ce cas
-        let ratio = Math.floor((100 * team.getPresentDays(member.permat)) / team.getWorkingDays(member.permat));
-        if (isNaN(ratio)) { ratio = 0; } // si getWorkingDay est à 0 --> division par 0 --> NaN
-        if (ratio < 40) {
-            DOMMeRatio.classList.add("text-danger");
-        }
-        else if (ratio < 50) {
-            DOMMeRatio.classList.add("text-warning");
-        }
-        DOMMeRatio.innerHTML =  ratio + "%";
-    });
-    
 }
 
 */

@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "MonUlisss",
-    "version": "0.7-alpha",
+    "version": "0.7.0",
     "description": "Tentative d'extraction de données de myUlis par Julian.",
     "browser_specific_settings": {
       "gecko": {
@@ -10,7 +10,7 @@
       }
     },    
     "permissions": [
-      "activeTab"
+      "activeTab", "tabs", "storage"
     ],
     "action": {
       "default_popup": "popups/monulisss.html",

@@ -4,7 +4,7 @@
  * 
  * Module à renommer car au final il fait plus que prévu
  * 
- * 
+ * explication des codes en fin de de code source
  */
 
 
@@ -76,9 +76,11 @@ export class CalendarResponse {
  */
 export class CalendarDetailsResponse {
 
-    constructor(jsonResponse, people) {
+    constructor(jsonResponse, people, startDate, endDate) {
         this.sets = jsonResponse;
         this.people = people; //liste des permat avec nom qui sont dans ce calendrier
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
 
@@ -119,14 +121,15 @@ export class CalendarDetailsResponse {
                 }
                 /*
                     On enlève les jours de congés pour avoir un solde cohérent
+                    on exclus les codes suivant car lié à du temps partiel :  ETPEVE, MALCER
                     on fait par contre attention à enlever par demi journée
-                    // TODO : Enelever les autres codes
-                ¨*/
+                    //TODO : Enelever les autres codes
+                */
                 if (calendarEvent.type == "ABSENCES" && calendarEvent.permat == permat) {
                     if (calendarEvent.payload.length > 0) {
                         let duration = 0;
                         calendarEvent.payload.forEach(absence => {
-                            if (absence.category == "CONGE") {
+                            if (absence.category == "CONGE" && absence.lid.TYPE != "ETPEVE" && absence.lid.TYPE != "ETPEVE") {
                                 let timeStart = new Date(`2000-01-01T${absence.computedStartTime}Z`);
                                 let timeEnd = new Date(`2000-01-01T${absence.computedEndTime}Z`);
                                 let diffInHours = (timeEnd - timeStart) / 3600000; //la diff est en millisecondes
@@ -143,6 +146,10 @@ export class CalendarDetailsResponse {
                 }
             })
         });
+
+        if (workingDaysCount < 0) {
+            workingDaysCount = 0;
+        }
         
         return workingDaysCount;
     }
@@ -224,13 +231,13 @@ export class CalendarDetailsResponse {
                     - pointage de >=5H --> 1 jour de présence
 
                     Les codes suivants sont des codes de prestations presentielle :
-                    POI (pointage) (POI-IN & POI-OUT ne sont pas pris en compte car sont des infos complémentaires incluse dans un POI)
+                    POI (pointage) (POI-IN & POI-OUT ne sont pas pris en compte car sont des infos complémentaires incluse dans un POI --> à changer)
                     PRES (Présentiel ETNIC)
                     FOR1, FOR2 (Formation)
                     PRE	(Forfait prestation)
                     MIE1 (Mission à l'étranger)
                     MIBE (Mission en Belgique)
-                    MIS	(Mission (pointage))
+                    MIS, MIS1	(Mission (pointage))
                     MIS-IN, MIS-OUT (Pointage Mission)                    
                     MIS1-HR	(Mission donnant droit à un CR)
                 */
@@ -242,19 +249,33 @@ export class CalendarDetailsResponse {
                         let totalPresenceDaysCount = 0;
                         // et on ne compte les présences que les jours ouvrés (pas les jours renseignés comme de la fermeture)
                         if (this.isOpeningDay(permat, calendarEvent.day)) {
+                            let alternatePOI = false;
+                            let alternatePOITimeStart = new Date();
                             calendarEvent.payload.pointages.forEach(pointage => {
-                                if (["POI","PRES","FOR1","FOR2","PRE","MIE1","MIBE","MIS","MIS1","MIS1-HR"].includes(pointage.nature.code)) {
+                                if (["POI-IN"].includes(pointage.nature.code)) {
+                                    alternatePOITimeStart = new Date(`2000-01-01T${pointage.in}Z`);
+                                    alternatePOI = true;
+                                }
+                                else if (["POI-OUT"].includes(pointage.nature.code)) {
+                                    let alternatePOITimeEnd = new Date(`2000-01-01T${pointage.out}Z`);
+                                    let duration = (alternatePOITimeEnd - alternatePOITimeStart) / 3600000;
+                                    if (duration >=5 ) {
+                                        totalPresenceDaysCount++;
+                                    }
+                                    else if (duration >= 2) { // 2, car un pointage PM est compté de 14:00 à 16:00 ...
+                                        totalPresenceDaysCount+=0.5;
+                                    }
+                                }
+                                else if (["POI","PRES","FOR1","FOR2","PRE","MIE1","MIBE","MIS","MIS1","MIS1-HR"].includes(pointage.nature.code)) {
                                     let timeStart = new Date(`2000-01-01T${pointage.in}Z`);
                                     let timeEnd = new Date(`2000-01-01T${pointage.out}Z`);
                                     let duration = (timeEnd - timeStart) / 3600000; //la diff est en millisecondes
                                     if (duration >=5 ) {
                                         totalPresenceDaysCount++;
-                                        //if (permat == 25374) console.log("Jour de presence le " + calendarEvent.day);
                                     }
                                     else if (duration >= 2) { // 2, car un pointage PM est compté de 14:00 à 16:00 ...
                                         totalPresenceDaysCount+=0.5;
-                                        //if (permat == 25374) console.log("1/2 Jour de presence le " + calendarEvent.day);
-                                    } 
+                                    }
                                 }
                             });
                             if (totalPresenceDaysCount > 1) {
@@ -290,6 +311,97 @@ export class CalendarDetailsResponse {
         }
 
     }
+
+
+    /**
+     * L'objectif de cette méthode est de récupérer un tableau de données par permat.
+     * il sera renvoyé au displayer qui mettra cela dans le csv d'export
+     * Structure de l'objet retourné :
+     *
+     *      data.days                                                   <- tableau contenant les jours de la période
+     *      data.permats                                                <- tableau d'objets avec comme clé le numero ulis (permat)
+     *          data.permats[].name                                     <- nom + prénom
+     *          data.permats[].fermetures                               <- tableau des fermetures
+     *              data.permats[].fermetures[].date                    <- tableau des dates avec comme clé la date
+     *                  data.permats[].fermetures[].date[].evenements   <- tableau d'événements du jour
+     *          data.permats[].absences                                 <- tableau des absences
+     *              data.permats[].absences[].date                      <- tableau des dates avec comme clé la date
+     *                  data.permats[].absences[].date[].evenements     <- tableau d'événements du jour
+     *          data.permats[].poitnages                                <- tableau des pointages
+     *              data.permats[].pointages[].date                     <- tableau des dates avec comme clé la date
+     *                  data.permats[].pointages[].date[].evenements    <- tableau d'événements du jour
+     *
+     *
+     * Methode à refactorer .
+     */
+    getExport() {
+
+        const data = {};
+        data.days = [];
+        data.permats = {} // j'utilise un objet car la clé est numérique (et si le premier permat est 20000 j'ai 19999 cases vides avant, merci JS :)
+        const people = this.getPeople();
+
+        // on commence par lister les jours de la période et on les place dans data.days
+        let currentDate = new Date(this.startDate.getTime());
+        while (currentDate <= this.endDate) {
+            data.days.push(currentDate.toISOString().split('T')[0]);
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        // on boucle ensuite sur les personnes présentes dans ce calendrier
+        this.getPeople().forEach((name, permat) => {
+            // première dimension du tableau
+            data.permats[permat] = { "name": name, "fermetures": [], "absences": [], "pointages": [] };
+
+            // boucle pour avoir les jours de fermeture, absences et pointages de cette personne
+            this.sets.forEach(calendar => {
+                calendar.forEach(calendarEvent => {
+
+                    if (calendarEvent.type == "FERMETURE" && calendarEvent.permat == permat) {
+                        if (calendarEvent.payload != null) {
+                            if (data.permats[permat].fermetures[calendarEvent.day] === undefined) {
+                                data.permats[permat].fermetures[calendarEvent.day] = [];
+                            }
+                            data.permats[permat].fermetures[calendarEvent.day].push(calendarEvent.payload.code);
+                        }
+                    }
+                    if (calendarEvent.type == "ABSENCES" && calendarEvent.permat == permat) {
+                        if (calendarEvent.payload != null) {
+                            if (data.permats[permat].absences[calendarEvent.day] === undefined) {
+                                data.permats[permat].absences[calendarEvent.day] = [];
+                            }
+                            if (calendarEvent.payload.length > 0) {
+                                calendarEvent.payload.forEach(absence => {
+                                    data.permats[permat].absences[calendarEvent.day].push(absence.lid.TYPE); //TYPE est bien en majuscule dans cette putain d'api
+                                });
+                            }
+                        }
+                    }
+                    if (calendarEvent.type == "POINTAGES" && calendarEvent.permat == permat) {
+                        if (calendarEvent.payload != null) {
+                            if (data.permats[permat].pointages[calendarEvent.day] === undefined) {
+                                data.permats[permat].pointages[calendarEvent.day] = [];
+                            }
+                            if ( calendarEvent.payload.pointages !== undefined ) {
+                                calendarEvent.payload.pointages.forEach(pointage => {
+                                    data.permats[permat].pointages[calendarEvent.day].push(pointage.nature.code);
+                                });
+                            }
+                        }
+                    }
+
+                });
+            });
+
+        });
+
+        /*for (let iPeople = 0; iPeople < this.people.length; iPeople++) {
+            console.log(this.people[iPeople]);
+            //data[this.people[i]] = ["fermetures","absences","pointages"];
+        }*/
+
+        return data;
+    }
     
 }
 
@@ -315,6 +427,7 @@ MIS1    non communiqué par anthony : mission en extérieur
 
 CGAN	Congé Annuel	Ne pas tenir compte
 RECU	Récupération (h. ordinaires)	Ne pas tenir compte
+REC1    non communiqué par Anthony : récupération heures exceptionnelles
 RETR	Retard train	Ne pas tenir compte
 CC02	Naissance (accouchement épouse/conjointe/ss même toit(20J)	Ne pas tenir compte
 RETM	Retour Malade	Ne pas tenir compte
@@ -333,6 +446,12 @@ CC04	Décès parent(1er degré) de l'agent ou son conjoint (5J)	Ne pas tenir com
 CSYN	Congé syndical	Ne pas tenir compte
 CC12	Congé pour cause de force majeure (enfant - 12 ans)	Ne pas tenir compte
 CPOL	Congé politique (dispense de service)	Ne pas tenir compte
+
+MALCER  non comuniqué par anthony : maladie sous certificat
+MAL     non communiqué par anthony : maladie
+
+ETPEVE  non communiqué par anthony : 4/5
+APC     non communiqué : lié au congé et temps partiel ( = le jour de congé ?)
 
 RECF	Arrivée tardive / Départ anticipé	Ne pas tenir compte
 ASPO	Absence sportive	Ne pas tenir compte

@@ -1,6 +1,6 @@
-//gère l'ouverture d'un tab pour aller sur myulis
-browser.runtime.onMessage.addListener(function(request) {
-    if (request.message === "open_new_tab") {
-        browser.tabs.create({"url": request.url});
+//gère l'ouverture des préférences du plugin
+/*browser.runtime.onMessage.addListener(function(request) {
+    if (request.message === "open_addon_preferences") {
+        browser.tabs.create({"url":"/options.html"});
     }
-});
+});*/

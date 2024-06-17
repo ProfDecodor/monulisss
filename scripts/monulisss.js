@@ -2,6 +2,7 @@ import * as Displayers from './modules/displayers.js';
 import * as Api from './modules/api.js';
 import * as ApiResponse from './modules/apiresponse.js';
 import * as Me from './modules/me.js';
+import {selectCalendar} from "./modules/displayers.js";
 
 
 var myCalendars = null; // contient la liste des calendriers disponibles pour l'utilisateur
@@ -32,6 +33,8 @@ browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                 Displayers.prepareDateSelector().addEventListener('change', () => { proceedWithSelectedCalendar(); });
                 Displayers.prepareCalendarSelector(myCalendars.getListForSelect()).addEventListener('change', () => { proceedWithSelectedCalendar(); });;
 
+                // au chargement, on récupère les sélections précédentes
+                restoreOptions();
                 proceedWithSelectedCalendar();
             } );
 
@@ -78,11 +81,12 @@ function proceedWithSelectedCalendar() {
                 Displayers.showNotAccessibleMessage(error);
             })
             .then( (jsonResponse) => {
-                myCalendarDetails = new ApiResponse.CalendarDetailsResponse(jsonResponse, myCalendars.getCalendarPeople(selectedCalendar));
-//console.log(myCalendarDetails.sets);
+                myCalendarDetails = new ApiResponse.CalendarDetailsResponse(jsonResponse, myCalendars.getCalendarPeople(selectedCalendar), startDate, endDate);
+console.log(myCalendarDetails.sets);
                 // affichage du calendrier
                 Displayers.displayCalendarTable(myCalendarDetails);
                 Displayers.displayPersonnalRatio(me, myCalendarDetails);
+                Displayers.handleDownloadButton(myCalendarDetails);
 
                 Displayers.hideLoading();                
             } );
@@ -92,103 +96,23 @@ function proceedWithSelectedCalendar() {
         hideLoading();
     }
 
-}
-
-
-
-
-
-
-/*
-// la fonction qui lance le bouzin
-function launch() {
-    
-}
-
-function getMe() {
-
-    fetch(API_ME)
-        .then(response => response.json())
-        .then(data => {
-            me.setPermat(data.permat);
-            me.setFirstName(data.prenom);
-            me.setLastName(data.nom);
-
-            // on rajoute ensuite un calendrier personnel, ne contenant que le numéro ulis de l'utilisateur
-            myCalendars.set("__MYSELF__", new Team());
-            myCalendars.get("__MYSELF__").addMember(me.getPermat(), me.getFirstName() + " " + me.getLastName());
-            
-            displayMe();
-            retriveDataFromApiAndDisplay("__MYSELF__");
-            
-        });
+    // on sauve les selects
+    saveOptions();
 
 }
 
-
-
-
-        .then(data => {
-            data.forEach(requestResponse => {
-                requestResponse.forEach( item => {
-                    const day = item.day;
-                    const permat = item.permat; 
-    
-                    // un payload existe si un événement a eu lieu le jour
-                    if (item.payload) {
-                        switch (item.type) {
-                            case 'FERMETURE':
-                                // on ne prend que les journées entières de fermture
-                                // si une demi-journée, la journée est comptée comme jour de travail
-                                if (item.payload.period == 'JE') {
-                                    myTeam.addTeamMemberEvent(permat, day, "FERMETURE");
-                                }
-                                break;
-                            case 'ABSENCES':
-                                if (item.payload[0]){ 
-                                    if (item.payload[0].dossier) {
-                                        myTeam.addTeamMemberEvent(permat, day, item.payload[0].dossier.nature.code);
-                                    }
-                                }
-                                break;
-                            case 'POINTAGES':
-                                if (item.payload.pointages) {
-                                    for (const pointage of item.payload.pointages) {
-                                        if (pointage.nature && pointage.nature.code) {
-                                            myTeam.addTeamMemberEvent(permat, day, pointage.nature.code);
-                                        }
-                                    }
-                                }
-                                break;
-                            default: 
-                                console.log("Type d'événement inconnu : " + item.type);
-                        }
-                    }
-                    
-                });
-            });
-    
-    
-            //surement possible de faire mieux ici
-            if (selectedCalendar == "__MYSELF__") {
-                displayMyRatio(myTeam, startDate, endDate);
-            }
-            else {
-                displayMyTeamTable(myTeam, startDate, endDate);
-            }
-    
-        })
-        .catch(error => {
-            console.error("Erreur : " + error);
-            displayNotAccessibleMessage();
-        });
-    
-        
-    }
-    else {
-        hideLoading();
-    }
-
+async function saveOptions() {
+    /*await browser.storage.sync.set({
+        selectedCalendar: Displayers.getSelectedCalendar(),
+        selectedDates: Displayers.getSelectedDates(true)
+    });*/
 }
 
-*/
+async function restoreOptions() {
+    /*let selectedCalendar = await browser.storage.managed.get('selectedCalendar');
+    let selectedDates = await browser.storage.managed.get('selectedDates');
+
+    Displayers.selectCalendar(selectedCalendar);
+    Displayers.selectDates(selectedDates);*/
+
+}
