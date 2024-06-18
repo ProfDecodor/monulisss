@@ -22,6 +22,13 @@ const DOM_MeLastName = document.getElementById("me_lastname");
 const DOM_MeRatio = document.getElementById("me_ratio");
 const DOM_MeMonth = document.getElementById("me_month");
 const DOM_ErrorMessageContent = document.getElementById("errormessagecontent");
+const DOM_Version = document.getElementById("version");
+
+
+
+// les choses à faire par défaut
+DOM_Version.innerText = browser.runtime.getManifest().version;
+DOM_DownloadButton.addEventListener("click", createCsvFile);
 
 
 export function displayLoading() {
@@ -270,22 +277,22 @@ export function displayCalendarTable(calendarDetails) {
 
 
 /**
- * Gère le clic sur le bouton de download
+ * Cette méthode place le contenu du calendrier dans l'élément bouton
  * @returns {null}
  */
 export function handleDownloadButton(calendarDetails) {
-
-    const data = calendarDetails.getExport();
-
-    console.log(data);
-
-    DOM_DownloadButton.addEventListener("click", function (e) {
-        createCsvFile(data);
-    });
-
+    DOM_DownloadButton.calendarDetails = calendarDetails;
 }
 
-function createCsvFile(data) {
+function createCsvFile() {
+
+    // le calendrier à exporter se situe dans l'élément bouton.
+    // on le récupère
+    let calendarDetails = DOM_DownloadButton.calendarDetails;
+
+    const data = calendarDetails.getExport();
+    console.log(data);
+
     const csvArray = [];
     const csvHeader = ["matricule", "nom", ""]; // la colonne vide est intentionnelle
 
@@ -353,6 +360,7 @@ function createCsvFile(data) {
         a.download = file.name;
         a.click();
         window.URL.revokeObjectURL(url);
+
         return null;
     }
 }
@@ -395,97 +403,4 @@ export function displayPersonnalRatio(me, calendarDetails) {
     DOM_MeRatio.innerHTML =  ratio + "%";
 
 }
-
-
-
-
-
-/*
-
-
-
-
-
-
-function displayMyTeamTable(team, startDate, endDate) {
-
-    //infos de date
-    /* DOMStartDate.textContent = startDate.toISOString().split("T")[0];
-    DOMEndDate.textContent = endDate.toISOString().split("T")[0];
-    DOMNumberOfDays.textContent = numberOfDays; * /
-
-    //on fait le csv en meme temps
-    const csvArray = [];
-    const csvHeader = ["matricule", "nom"];
-
-    let currentDate = new Date(startDate.getTime());
-
-    while (currentDate <= endDate) {
-        csvHeader.push(currentDate.toISOString().split('T')[0]);
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
-    csvArray.push(csvHeader);
-
-    //contenu du tableau, et on commence par le vider
-    while (myTeamTable.firstChild) {
-        myTeamTable.removeChild(myTeamTable.firstChild);
-    }
-    team.getMembers().forEach(member => {
-        const row = document.createElement("tr");
-
-        const nameCell = document.createElement("td");
-        nameCell.textContent = member.name;
-        row.appendChild(nameCell);
-
-        const permatCell = document.createElement("td");
-        permatCell.textContent = member.permat;
-        row.appendChild(permatCell);
-
-        const workingDaysCell = document.createElement("td");
-        workingDaysCell.textContent = team.getWorkingDays(member.permat);
-        row.appendChild(workingDaysCell);
-
-        const presentDaysCell = document.createElement("td");
-        presentDaysCell.textContent = team.getPresentDays(member.permat);
-        row.appendChild(presentDaysCell);
-
-        const ratioCell = document.createElement("td");
-        if ( team.getPresentDays(member.permat) == 0 && team.getWorkingDays(member.permat) == 0 ) {
-            ratioCell.textContent =  "--%";
-        }
-        else {
-            let ratio = Math.floor((100 * team.getPresentDays(member.permat)) / team.getWorkingDays(member.permat));
-            if (isNaN(ratio)) { ratio = 0; } // si getWorkingDay est à 0 --> division par 0 --> NaN
-            if (ratio < 40) {
-                ratioCell.classList.add("text-danger");
-            }
-            else if (ratio < 50) {
-                ratioCell.classList.add("text-warning");
-            }
-            ratioCell.textContent =  ratio + "%";
-        }
-
-        row.appendChild(ratioCell);
-
-        //html
-        myTeamTable.appendChild(row);
-
-        //csv
-        let currentDate = new Date(startDate.getTime());
-        let memberEvents = [];
-        while (currentDate <= endDate) {
-            memberEvents = memberEvents.concat(team.getMemberEvent(member.permat, currentDate.toISOString().split('T')[0]).join(','));
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-        csvArray.push( [ member.permat, member.name ].concat(memberEvents) );
-    });
-
-    hideLoading();
-
-    // on cree le lien de téléchargement
-    DOMDownloadButton.addEventListener("click", function (e) { createCsvFile(csvArray)} );
-
-}
-
-*/
 
