@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "MonUlisss",
-    "version": "0.7.2",
+    "version": "0.7.3",
     "description": "Tentative d'extraction de données de myUlis par Julian.",
     "browser_specific_settings": {
       "gecko": {
