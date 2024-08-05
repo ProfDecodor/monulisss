@@ -82,7 +82,7 @@ function proceedWithSelectedCalendar() {
             })
             .then( (jsonResponse) => {
                 myCalendarDetails = new ApiResponse.CalendarDetailsResponse(jsonResponse, myCalendars.getCalendarPeople(selectedCalendar), startDate, endDate);
-console.log(myCalendarDetails.sets);
+//console.log(myCalendarDetails.sets);
                 // affichage du calendrier
                 Displayers.displayCalendarTable(myCalendarDetails);
                 Displayers.displayPersonnalRatio(me, myCalendarDetails);

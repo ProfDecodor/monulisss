@@ -306,6 +306,10 @@ export class CalendarDetailsResponse {
                         return true;
                     }
                     else {
+                        // prise en compte du code ULIMIN ... ce truc est apparu chez SGL et a disparu ..
+                        if (calendarEvent.payload.code == "ULIMIN") {
+                            return true;
+                        }
                         return false;
                     }
                 }
@@ -460,5 +464,7 @@ ASPO	Absence sportive	Ne pas tenir compte
 ASPO2	Absence sportive ( > limite)	Ne pas tenir compte
 CC11	Convocation comme témoin/comparution personnelle(Durée néc.)	Ne pas tenir compte
 REST	Retard STIB	Ne pas tenir compte
+
+ULIMIN --> code apparu une fois chez SGL et a disparu du jour au lendemain. code lié à une fermeture apparemment
 
 */
