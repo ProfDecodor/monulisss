@@ -291,7 +291,7 @@ function createCsvFile() {
     let calendarDetails = DOM_DownloadButton.calendarDetails;
 
     const data = calendarDetails.getExport();
-    console.log(data);
+    //console.log(data);
 
     const csvArray = [];
     const csvHeader = ["matricule", "nom", ""]; // la colonne vide est intentionnelle

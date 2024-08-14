@@ -127,20 +127,22 @@ export class CalendarDetailsResponse {
                         //TODO : Enelever les autres codes
                     */
                     if (calendarEvent.type == "ABSENCES" && calendarEvent.permat == permat) {
-                        if (calendarEvent.payload.length > 0) {
-                            let duration = 0;
-                            calendarEvent.payload.forEach(absence => {
-                                if (absence.category == "CONGE" && absence.lid.TYPE != "ETPEVE" && absence.lid.TYPE != "ETPEVE") {
-                                    let timeStart = new Date(`2000-01-01T${absence.computedStartTime}Z`);
-                                    let timeEnd = new Date(`2000-01-01T${absence.computedEndTime}Z`);
-                                    let diffInHours = (timeEnd - timeStart) / 3600000; //la diff est en millisecondes
-                                    duration += diffInHours;
+                        if (this.isOpeningDay(permat, calendarEvent.day)) {
+                            if (calendarEvent.payload.length > 0) {
+                                let duration = 0;
+                                calendarEvent.payload.forEach(absence => {
+                                    if (absence.category == "CONGE" && absence.lid.TYPE != "ETPEVE" && absence.lid.TYPE != "ETPEVE") {
+                                        let timeStart = new Date(`2000-01-01T${absence.computedStartTime}Z`);
+                                        let timeEnd = new Date(`2000-01-01T${absence.computedEndTime}Z`);
+                                        let diffInHours = (timeEnd - timeStart) / 3600000; //la diff est en millisecondes
+                                        duration += diffInHours;
+                                    }
+                                });
+                                if (duration >= 5) {
+                                    workingDaysCount--;
+                                } else if (duration >= 2) { // 2, car une récup un après midi est compté de 14:00 à 16:00 ...
+                                    workingDaysCount -= 0.5;
                                 }
-                            });
-                            if (duration >= 5) {
-                                workingDaysCount--;
-                            } else if (duration >= 2) { // 2, car une récup un après midi est compté de 14:00 à 16:00 ...
-                                workingDaysCount -= 0.5;
                             }
                         }
                     }
