@@ -77,7 +77,7 @@ export function prepareDateSelector() {
     let today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    //contenu : le mois en cours, -1 et -2
+    //contenu : le mois en cours et les 6 précédent
 
     function addDateOption(select, pValue, pText) {
         let option = document.createElement("option");
@@ -89,10 +89,18 @@ export function prepareDateSelector() {
     let monthMinus0 = new Date(today.getFullYear(), today.getMonth());
     let monthMinus1 = new Date(today.getFullYear(), today.getMonth() - 1);
     let monthMinus2 = new Date(today.getFullYear(), today.getMonth() - 2);
+    let monthMinus3 = new Date(today.getFullYear(), today.getMonth() - 3);
+    let monthMinus4 = new Date(today.getFullYear(), today.getMonth() - 4);
+    let monthMinus5 = new Date(today.getFullYear(), today.getMonth() - 5);
+    let monthMinus6 = new Date(today.getFullYear(), today.getMonth() - 6);
 
     addDateOption(DOM_DateSelector, "month-0", "Ce mois ("+monthMinus0.toLocaleString('default', { month: 'long' })+")");
     addDateOption(DOM_DateSelector, "month-1", monthMinus1.toLocaleString('default', { month: 'long' }));
     addDateOption(DOM_DateSelector, "month-2", monthMinus2.toLocaleString('default', { month: 'long' }));
+    addDateOption(DOM_DateSelector, "month-3", monthMinus3.toLocaleString('default', { month: 'long' }));
+    addDateOption(DOM_DateSelector, "month-4", monthMinus4.toLocaleString('default', { month: 'long' }));
+    addDateOption(DOM_DateSelector, "month-5", monthMinus5.toLocaleString('default', { month: 'long' }));
+    addDateOption(DOM_DateSelector, "month-6", monthMinus6.toLocaleString('default', { month: 'long' }));
 
     // Sélection par défaut de l'option "ceMois"
     DOM_DateSelector.value = "month-0";
@@ -107,6 +115,7 @@ export function prepareDateSelector() {
  * si on passe un true en param, on obtient uniquement la value du select. sinon, on récpère les date
  * @returns un tableau contenant la date de début et la date de fin
  */
+// TODO : refactor ce switch fait à la va vite pour répondre à une urgence
 export function getSelectedDates(onlyValue=false) {
 
     if (onlyValue) {
@@ -121,6 +130,26 @@ export function getSelectedDates(onlyValue=false) {
     let endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()-1));
 
     switch (selectedDate) {
+        // il y a six mois
+        case 'month-6':
+            startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 6, 1));
+            endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 5 , 0));
+            break;
+        // il y a cinq mois
+        case 'month-5':
+            startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 5, 1));
+            endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 4 , 0));
+            break;
+        // il y a quatre mois
+        case 'month-4':
+            startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 4, 1));
+            endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3 , 0));
+            break;
+        // il y a trois mois
+        case 'month-3':
+            startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 3, 1));
+            endDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 2 , 0));
+            break;
         // il y a deux mois
         case 'month-2':
             startDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 2, 1));
