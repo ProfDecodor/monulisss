@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "MonUlisss",
-    "version": "0.7.5",
+    "version": "0.7.6",
     "description": "Tentative d'extraction de données de myUlis et de calcul hasardeux d'un taux de présence.",
     "browser_specific_settings": {
       "gecko": {

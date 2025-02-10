@@ -131,6 +131,7 @@ export class CalendarDetailsResponse {
                             if (calendarEvent.payload.length > 0) {
                                 let duration = 0;
                                 calendarEvent.payload.forEach(absence => {
+                                    //TODO: refactor ce if
                                     if (absence.category == "CONGE" && absence.lid.TYPE != "ETPEVE" && absence.lid.TYPE != "ETPEVE") {
                                         let timeStart = new Date(`2000-01-01T${absence.computedStartTime}Z`);
                                         let timeEnd = new Date(`2000-01-01T${absence.computedEndTime}Z`);
@@ -146,7 +147,34 @@ export class CalendarDetailsResponse {
                             }
                         }
                     }
-                })
+
+                    /*
+                        On enlève les cas de pointages particuliers
+                        - RETM (retour de maladie)
+                    */
+                    if (calendarEvent.type == "POINTAGES" && calendarEvent.permat == permat) {
+                        if (this.isOpeningDay(permat, calendarEvent.day)) {
+                            let duration = 0;
+                            if (calendarEvent.payload.pointages.length > 0) {
+                                calendarEvent.payload.pointages.forEach(pointage => {
+                                    if (pointage.nature.code == "RETM") {
+                                        let timeStart = new Date(`2000-01-01T${pointage.in}Z`); // ouais .... ici c'est in et out pas de computerstarttime ...
+                                        let timeEnd = new Date(`2000-01-01T${pointage.out}Z`);
+                                        let diffInHours = (timeEnd - timeStart) / 3600000; //la diff est en millisecondes
+                                        duration += diffInHours;
+                                        console.log(duration);
+                                    }
+                                });
+                                if (duration >= 5) {
+                                    workingDaysCount--;
+                                } else if (duration >= 2) {
+                                    workingDaysCount -= 0.5;
+                                }
+                            }
+                        }
+                    }
+
+                });
             }
         });
 
@@ -454,6 +482,8 @@ CC04	Décès parent(1er degré) de l'agent ou son conjoint (5J)	Ne pas tenir com
 CSYN	Congé syndical	Ne pas tenir compte
 CC12	Congé pour cause de force majeure (enfant - 12 ans)	Ne pas tenir compte
 CPOL	Congé politique (dispense de service)	Ne pas tenir compte
+
+CC06    non communiqué par anthony : deces d'un parent proche
 
 MALCER  non comuniqué par anthony : maladie sous certificat
 MAL     non communiqué par anthony : maladie
