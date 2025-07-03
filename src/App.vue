@@ -25,6 +25,11 @@
             <MonthSelector />
           </div>
         </div>
+        <div class="row mb-3">
+          <div class="col">
+            <AgendaSelector />
+          </div>
+        </div>
       </div>
 
       <div v-else class="alert alert-danger">
@@ -64,6 +69,7 @@ import IdentityInfo from './components/IdentityInfo.vue'
 import PresenceInfo from './components/PresenceInfo.vue'
 import PresenceInfoDetail from './components/PresenceInfoDetail.vue'
 import MonthSelector from './components/MonthSelector.vue'
+import AgendaSelector from "./components/AgendaSelector.vue";
 import { useUserStore } from './stores/userStore'
 import { useTabStore } from './stores/tabStore'
 
@@ -73,7 +79,7 @@ const tabStore = useTabStore()
 onMounted(async () => {
   await tabStore.getActiveTab()
   if (tabStore.isOnMyulis) {
-    await userStore.fetchIdentity()
+    await userStore.fetchUserData()
   }
 })
 </script>

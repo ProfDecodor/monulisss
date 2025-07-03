@@ -9,7 +9,7 @@
     </div>
 
     <div v-else>
-      <div v-if="presenceData.presenceRate !== null" 
+      <div v-if="presenceData.presenceRate !== null"
            class="d-flex justify-content-center my-4">
         <svg width="120" height="120" viewBox="0 0 120 120">
           <circle
@@ -34,7 +34,7 @@
         </svg>
       </div>
 
-      <div v-else class="text-muted">
+      <div v-else class="text-muted"e >
         Aucune donnée de présence.
       </div>
     </div>
@@ -88,6 +88,7 @@ watch([() => monthStore.startDate, () => monthStore.endDate], fetchData)
 
 // Recharger quand l'utilisateur est disponible
 watch(() => userStore.user, fetchData)
+
 </script>
 
 <style scoped>

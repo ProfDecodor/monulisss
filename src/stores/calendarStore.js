@@ -36,6 +36,7 @@ export const useCalendarStore = defineStore('calendar', {
         return
       }
 
+
       this.loading = true
       this.error = null
 
