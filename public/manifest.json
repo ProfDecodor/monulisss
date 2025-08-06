@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "MonUlisss",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "description": "Tentative d'extraction de données de myUlis et de calcul hasardeux d'un taux de présence.",
     "browser_specific_settings": {
       "gecko": {
@@ -24,6 +24,6 @@
         "96": "icons/unicorn-96.png",
         "128": "icons/unicorn-128.png"
     },
-    "permissions": ["scripting","tabs","activeTab","host"],
+    "permissions": ["scripting","tabs","activeTab"],
     "host_permissions": ["https://myulis.etnic.be/*"]
   }

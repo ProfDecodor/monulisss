@@ -49,11 +49,11 @@ const presenceData = computed(() => {
 async function fetchData() {
   if (!userStore.user?.permat) return
   
-  await calendarStore.fetchCalendar(
+  /*await calendarStore.fetchCalendar(
     [userStore.user.permat],
     monthStore.startDate,
     monthStore.endDate
-  )
+  )*/
 }
 
 onMounted(fetchData)

@@ -12,8 +12,12 @@ export const useCalendarStore = defineStore('calendar', {
   }),
 
   getters: {
-    hasData: (state) => !!state.calendarSets?.length,
-    
+    //hasData: (state) => !!state.calendarSets?.length,
+    hasData: (state) => {
+      return state.calendarSets?.length > 0 &&
+          state.calendarSets.some(set => Array.isArray(set) && set.length > 0)
+    },
+
     // Calculateurs de présence pour un permat donné
     getPresenceDataForPermat: (state) => (permat) => {
       if (!state.calendarSets?.length) return null
@@ -35,7 +39,6 @@ export const useCalendarStore = defineStore('calendar', {
       if (JSON.stringify(params) === JSON.stringify(this.lastFetchParams)) {
         return
       }
-
 
       this.loading = true
       this.error = null
@@ -86,6 +89,7 @@ export const useCalendarStore = defineStore('calendar', {
     // ///////////////////////////////////////////////////////////////////////////////
     // 
     // METHODES DE CALCUL
+    // TODO: ceci devrait peut être se trouver dans un composable ?
     //
     // ///////////////////////////////////////////////////////////////////////////////
 
@@ -172,7 +176,7 @@ export const useCalendarStore = defineStore('calendar', {
      */
     computeWorkingDays(permat) {
       if (!this.calendarSets) return 0
-      
+
       let count = 0
       this.calendarSets.forEach((set) => {
         set.forEach((event) => {

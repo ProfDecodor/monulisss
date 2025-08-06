@@ -29,8 +29,6 @@ export const useUserStore = defineStore('user', {
             this.loading = true
             this.error = null
 
-            console.log("start")
-
             try {
                 const [result] = await chrome.scripting.executeScript({
                     target: {tabId: tabStore.currentTabId},
@@ -60,7 +58,6 @@ export const useUserStore = defineStore('user', {
 
                 this.user = result.result
             } catch (err) {
-                console.error('Erreur de récupération via l\'onglet :', err)
                 this.error = err.message
                 this.user = null
             } finally {
@@ -76,8 +73,6 @@ export const useUserStore = defineStore('user', {
                 throw new Error('Aucun onglet actuel disponible')
             }
 
-            console.log("🔍 Début fetchAgendas - tabId:", tabStore.currentTabId)
-
             this.loadingAgendas = true
             this.agendasError = null
 
@@ -86,61 +81,40 @@ export const useUserStore = defineStore('user', {
                     target: {tabId: tabStore.currentTabId},
                     func: () => {
                         return (async () => {
-                            const logs = [] // Pour collecter les logs
 
                             try {
-                                logs.push("🌐 Début de l'exécution dans la page web")
-                                logs.push("🌐 URL actuelle: " + window.location.href)
-
-                                logs.push("🌐 Avant l'appel fetch")
                                 const res = await fetch('https://myulis.etnic.be/api/autorisation/getPopulationAgenda', {
                                     credentials: 'include'
                                 })
-                                logs.push("🌐 Réponse reçue, status: " + res.status)
 
                                 if (!res.ok) throw new Error('HTTP ' + res.status)
                                 const data = await res.json()
 
-                                logs.push("🌐 Data reçue: " + JSON.stringify(data))
-
                                 // L'API retourne directement un tableau JSON, pas une structure XML
                                 // Filtrer uniquement les agendas avec mode "calendarFull"
                                 const filteredAgendas = Array.isArray(data) ?
-                                    data.filter(agenda => agenda.mode !== 'calendarDiscreet') : []
-
-                                logs.push("🌐 Agendas filtrés: " + JSON.stringify(filteredAgendas))
-                                logs.push("🌐 Modes disponibles: " + JSON.stringify(data.map(a => a.mode)))
+                                    data.filter(agenda => agenda.mode !== 'calendarDiscreet')
+                                    : []
 
                                 return {
                                     data: filteredAgendas,
-                                    logs: logs
                                 }
                             } catch (err) {
-                                logs.push("🌐 Erreur dans la page web: " + err.message)
                                 return {
                                     error: err.message,
-                                    logs: logs
                                 }
                             }
                         })()
                     }
                 })
 
-                console.log("📋 Résultat de l'executeScript:", result)
-
-                // Afficher les logs de la page web dans la console de l'extension
-                if (result.result?.logs) {
-                    result.result.logs.forEach(log => console.log(log))
-                }
-
                 if (result.result?.error) {
                     throw new Error(result.result.error)
                 }
 
                 this.agendas = result.result?.data || []
-                console.log("✅ Agendas stockés:", this.agendas)
+
             } catch (err) {
-                console.error('Erreur de récupération des agendas :', err)
                 this.agendasError = err.message
                 this.agendas = []
             } finally {
