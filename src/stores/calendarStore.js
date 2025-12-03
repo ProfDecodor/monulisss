@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSelectedMonthStore } from './selectedMonthStore'
+import { useTabStore } from './tabStore'
 
 const API_DATA = 'https://myulis.etnic.be/api/data'
 
@@ -21,7 +22,7 @@ export const useCalendarStore = defineStore('calendar', {
     // Calculateurs de présence pour un permat donné
     getPresenceDataForPermat: (state) => (permat) => {
       if (!state.calendarSets?.length) return null
-      
+
       return {
         presenceRate: state.getPresenceRateForPermat(permat),
         presenceDays: state.computePresenceDays(permat),
@@ -34,6 +35,12 @@ export const useCalendarStore = defineStore('calendar', {
 
   actions: {
     async fetchCalendar(permats, startDate, endDate) {
+      const tabStore = useTabStore()
+
+      if (!tabStore.currentTabId) {
+        throw new Error('Aucun onglet actuel disponible')
+      }
+
       // Éviter les appels redondants
       const params = { permats, startDate: startDate.getTime(), endDate: endDate.getTime() }
       if (JSON.stringify(params) === JSON.stringify(this.lastFetchParams)) {
@@ -44,39 +51,77 @@ export const useCalendarStore = defineStore('calendar', {
       this.error = null
 
       const dd = startDate.toLocaleDateString('fr-CA').split("T")[0] // fr-CA car date au format yyyy-mm-dd exigée par myulis
-      
+
       // Si le mois est en cours, on prend hier comme date de fin
       const today = new Date()
-      const isCurrentMonth = startDate.getMonth() === today.getMonth() && 
+      const isCurrentMonth = startDate.getMonth() === today.getMonth() &&
                            startDate.getFullYear() === today.getFullYear()
-      
-      const adjustedEndDate = isCurrentMonth ? 
+
+      const adjustedEndDate = isCurrentMonth ?
         new Date(today.setDate(today.getDate() - 1)) : endDate
 
       const df = adjustedEndDate.toLocaleDateString('fr-CA').split("T")[0] // fr-CA car date au format yyyy-mm-dd exigée par myulis
 
-      const makePayload = (types) => ({ types, permats, dd, df })
-
       try {
-        const responses = await Promise.all([
-          fetch(API_DATA, {
-            method: 'POST',
-            body: JSON.stringify(makePayload(["FERMETURE"])),
-            headers: { 'Content-Type': 'application/json' }
-          }),
-          fetch(API_DATA, {
-            method: 'POST',
-            body: JSON.stringify(makePayload(["ABSENCES"])),
-            headers: { 'Content-Type': 'application/json' }
-          }),
-          fetch(API_DATA, {
-            method: 'POST',
-            body: JSON.stringify(makePayload(["POINTAGES"])),
-            headers: { 'Content-Type': 'application/json' }
-          })
-        ])
+        const [result] = await chrome.scripting.executeScript({
+          target: { tabId: tabStore.currentTabId },
+          func: (apiData, permats, dd, df) => {
+            return (async () => {
+              const makePayload = (types) => ({ types, permats, dd, df })
 
-        this.calendarSets = await Promise.all(responses.map(r => r.json()))
+              try {
+                const responses = await Promise.all([
+                  fetch(apiData, {
+                    method: 'POST',
+                    body: JSON.stringify(makePayload(["FERMETURE"])),
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Referer': 'https://myulis.etnic.be/',
+                      'Origin': 'https://myulis.etnic.be'
+                    }
+                  }),
+                  fetch(apiData, {
+                    method: 'POST',
+                    body: JSON.stringify(makePayload(["ABSENCES"])),
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Referer': 'https://myulis.etnic.be/',
+                      'Origin': 'https://myulis.etnic.be'
+                    }
+                  }),
+                  fetch(apiData, {
+                    method: 'POST',
+                    body: JSON.stringify(makePayload(["POINTAGES"])),
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Referer': 'https://myulis.etnic.be/',
+                      'Origin': 'https://myulis.etnic.be'
+                    }
+                  })
+                ])
+
+                const data = await Promise.all(responses.map(r => {
+                  if (!r.ok) throw new Error('HTTP ' + r.status)
+                  return r.json()
+                }))
+
+                return { data }
+              } catch (err) {
+                return { error: err.message }
+              }
+            })()
+          },
+          args: [API_DATA, permats, dd, df]
+        })
+
+        if (result.result?.error) {
+          throw new Error(result.result.error)
+        }
+
+        this.calendarSets = result.result?.data || null
         this.lastFetchParams = params
       } catch (err) {
         this.error = err.message || 'Erreur inconnue'

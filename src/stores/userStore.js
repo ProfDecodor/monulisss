@@ -36,7 +36,11 @@ export const useUserStore = defineStore('user', {
                         return (async () => {
                             try {
                                 const res = await fetch('https://myulis.etnic.be/api/user/me', {
-                                    credentials: 'include'
+                                    credentials: 'include',
+                                    headers: {
+                                        'Referer': 'https://myulis.etnic.be/',
+                                        'Origin': 'https://myulis.etnic.be'
+                                    }
                                 })
                                 if (!res.ok) throw new Error('HTTP ' + res.status)
                                 const data = await res.json()
@@ -84,7 +88,11 @@ export const useUserStore = defineStore('user', {
 
                             try {
                                 const res = await fetch('https://myulis.etnic.be/api/autorisation/getPopulationAgenda', {
-                                    credentials: 'include'
+                                    credentials: 'include',
+                                    headers: {
+                                        'Referer': 'https://myulis.etnic.be/',
+                                        'Origin': 'https://myulis.etnic.be'
+                                    }
                                 })
 
                                 if (!res.ok) throw new Error('HTTP ' + res.status)
