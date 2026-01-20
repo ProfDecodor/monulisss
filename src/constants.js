@@ -46,6 +46,7 @@ export const SICK_RETURN_CODE = 'RETM'
 export const LEAVE_CATEGORY = 'CONGE'
 
 // Code spécial pour les fermetures (jour considéré comme ouvré malgré FERMETURE)
+// Ce code a poppé une fois chez Stéphane et je ne l'ai jamais revu par la suite.
 export const SPECIAL_OPENING_CODE = 'ULIMIN'
 
 // Mode d'agenda à exclure
