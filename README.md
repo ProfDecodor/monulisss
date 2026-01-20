@@ -119,6 +119,59 @@ npm run preview  # Prévisualisation du build
 3. Cliquer sur **"Charger l'extension non empaquetée"**
 4. Sélectionner le dossier `dist/`
 
+## Comment contribuer
+
+Ce projet est ouvert aux contributions des collègues du département développement de l'ETNIC.
+
+### Préparer son environnement
+
+1. **Forker** le dépôt sur GitHub
+2. **Cloner** votre fork localement :
+   ```bash
+   git clone https://github.com/VOTRE_USERNAME/monulisss.git
+   cd monulisss
+   npm install
+   ```
+3. **Créer une branche** pour votre modification :
+   ```bash
+   git checkout -b feature/ma-nouvelle-fonctionnalite
+   ```
+
+### Bonnes pratiques
+
+- **Testez** votre code en chargeant l'extension dans Firefox (`about:debugging`)
+- **Respectez** la structure existante du projet (stores, composables, components)
+- **Utilisez** les constantes de `src/constants.js` pour les codes métier myUlis
+- **Commentez** en français pour rester cohérent avec le code existant
+- **Vérifiez** que le build passe avant de soumettre : `npm run build`
+
+### Soumettre une Pull Request
+
+1. **Committez** vos modifications avec un message clair :
+   ```bash
+   git add .
+   git commit -m "Ajout de la fonctionnalité X"
+   ```
+2. **Poussez** vers votre fork :
+   ```bash
+   git push origin feature/ma-nouvelle-fonctionnalite
+   ```
+3. **Créez une Pull Request** depuis GitHub vers la branche `main` du dépôt principal
+4. **Décrivez** vos modifications dans la PR (quoi, pourquoi, comment tester)
+
+### Idées de contributions
+
+- Ajout de nouveaux codes de pointage dans `constants.js`
+- Amélioration de l'interface utilisateur
+- Support d'autres navigateurs
+- Ajout de graphiques/statistiques
+
+### Questions ?
+
+Contactez julian.davreux@etnic.be; n'ouvrez pas une **Issue** sur GitHub ni un ticket ServiceNow.
+
+---
+
 ## Changelog
 
 ### v0.8.3
