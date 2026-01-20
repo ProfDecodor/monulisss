@@ -1,6 +1,6 @@
 <template>
   <div class="p-3">
-    <!-- ✅ Si on est sur myulis -->
+    <!-- Si on est sur myulis -->
     <div v-if="tabStore.isOnMyulis">
       <div v-if="userStore.loading">
         <div class="spinner-border text-primary" role="status">
@@ -33,7 +33,7 @@
       </div>
 
       <div v-else class="alert alert-danger">
-        Impossible de récupérer l'identité.
+        ❌ Impossible de récupérer l'identité.
         <div v-if="userStore.error" class="small text-muted mt-1">
           {{ userStore.error }}
         </div>
@@ -83,7 +83,3 @@ onMounted(async () => {
   }
 })
 </script>
-
-<style>
-  html{min-width:500px}
-</style>

@@ -1,5 +1,136 @@
-# Vue 3 + Vite
+# MonUlisss
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Extension de navigateur (Firefox/Chrome) pour extraire et visualiser les données de présence depuis **myUlis** (système RH de l'ETNIC).
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## Fonctionnalités
+
+- Affichage du taux de présence personnel avec indicateur visuel coloré
+- Détail des jours travaillés, télétravail et présence sur site
+- Sélection de période par mois (12 derniers mois)
+- Vue d'équipe avec tableau récapitulatif par agenda/calendrier
+- Détection des pointages en erreur
+- Retry automatique en cas d'échec réseau
+
+## Installation
+
+### Version stable (recommandée)
+
+La version installable du plugin peut être téléchargée directement :
+
+**[Télécharger MonUlisss (latest.xpi)](https://etnic.perfectday.be/monulisss/latest.xpi)**
+
+### Depuis les sources
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/ProfDecodor/monulisss.git
+cd monulisss
+
+# Installer les dépendances
+npm install
+
+# Lancer en mode développement
+npm run dev
+
+# Construire pour la production
+npm run build
+```
+
+## Utilisation
+
+1. Installer l'extension dans Firefox et lui donner les permissions nécessaires
+2. Se connecter à [myulis.etnic.be](https://myulis.etnic.be)
+3. Cliquer sur l'icône de l'extension dans la barre d'outils
+4. Les données de présence s'affichent automatiquement
+
+
+## Technologies
+
+| Technologie | Usage |
+|-------------|-------|
+| **Vue.js 3** | Framework frontend |
+| **Pinia** | Gestion d'état |
+| **Vite** | Build tool |
+| **Bootstrap 5** | Interface utilisateur |
+| **date-fns** | Manipulation des dates |
+
+## Structure du projet
+
+```
+src/
+├── components/          # Composants Vue
+│   ├── AgendaSelector.vue      # Sélecteur d'agenda + tableau équipe
+│   ├── IdentityInfo.vue        # Affichage identité utilisateur
+│   ├── MonthSelector.vue       # Sélecteur de mois
+│   ├── PresenceInfo.vue        # Cercle de taux de présence
+│   └── PresenceInfoDetail.vue  # Détail des statistiques
+├── composables/         # Logique réutilisable
+│   └── usePresenceCalculator.js  # Calculs de présence optimisés
+├── stores/              # Stores Pinia
+│   ├── calendarStore.js        # Données calendrier
+│   ├── selectedAgendaStore.js  # Agenda sélectionné
+│   ├── selectedMonthStore.js   # Mois sélectionné
+│   ├── tabStore.js             # Gestion onglet navigateur
+│   └── userStore.js            # Données utilisateur
+├── utils/               # Utilitaires
+│   └── api.js                  # Helpers API (retry, URLs)
+├── constants.js         # Constantes métier (codes pointage, seuils)
+├── App.vue              # Composant racine
+├── main.js              # Point d'entrée Vue
+└── monulisss.html       # Page popup de l'extension
+```
+
+## Permissions de l'extension
+
+| Permission | Raison |
+|------------|--------|
+| `scripting` | Injection de scripts pour les appels API authentifiés |
+| `tabs` | Accès à l'onglet actif |
+| `activeTab` | Interaction avec l'onglet courant |
+| `host_permissions: myulis.etnic.be` | Accès au domaine myUlis uniquement |
+
+## Développement
+
+### Prérequis
+
+- Node.js >= 20
+- npm
+
+### Scripts disponibles
+
+```bash
+npm run dev      # Serveur de développement avec hot-reload
+npm run build    # Build de production dans dist/
+npm run preview  # Prévisualisation du build
+```
+
+### Charger l'extension en mode développement
+
+#### Firefox
+
+1. Ouvrir `about:debugging#/runtime/this-firefox`
+2. Cliquer sur **"Charger un module complémentaire temporaire"**
+3. Sélectionner le fichier `dist/manifest.json`
+
+#### Chrome
+
+1. Ouvrir `chrome://extensions`
+2. Activer le **"Mode développeur"** (toggle en haut à droite)
+3. Cliquer sur **"Charger l'extension non empaquetée"**
+4. Sélectionner le dossier `dist/`
+
+## Changelog
+
+### v0.8.3
+- Optimisation des calculs de présence (mise en cache)
+- Ajout du retry automatique pour les appels API
+- Parallélisation du chargement des données
+- Refactorisation du code (constantes, composables)
+
+## Licence
+
+Projet interne ETNIC.
+
+## Contact
+
+julian.davreux@etnic.be

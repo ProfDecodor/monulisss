@@ -56,12 +56,13 @@
           <td>
             <div class="d-flex align-items-center">
               <img
-                  v-if="user.photo"
-                  :src="`https://myulis.etnic.be${user.photo}`"
+                  v-if="getPhotoUrl(user.photo)"
+                  :src="getPhotoUrl(user.photo)"
                   :alt="user.nom"
                   class="rounded-circle me-2"
                   width="32"
                   height="32"
+                  @error="onImageError"
               >
               <span
                   v-else
@@ -96,11 +97,12 @@
 </template>
 
 <script setup>
-import {watch, computed} from 'vue'
-import {useUserStore} from '@/stores/userStore'
-import {useSelectedAgendaStore} from '@/stores/selectedAgendaStore'
-import {useCalendarStore} from "@/stores/calendarStore.js"
-import {useSelectedMonthStore} from '@/stores/selectedMonthStore'
+import { watch, computed } from 'vue'
+import { useUserStore } from '@/stores/userStore'
+import { useSelectedAgendaStore } from '@/stores/selectedAgendaStore'
+import { useCalendarStore } from '@/stores/calendarStore.js'
+import { useSelectedMonthStore } from '@/stores/selectedMonthStore'
+import { buildPhotoUrl } from '@/utils/api'
 
 const userStore = useUserStore()
 const agendaStore = useSelectedAgendaStore()
@@ -123,7 +125,9 @@ const selectedPermats = computed(() => {
   return selectedAgendaUsers.value.map(user => user.permat)
 })
 
-// Fonction pour charger les données du calendrier
+/**
+ * Charge les données du calendrier pour les utilisateurs sélectionnés
+ */
 async function loadCalendarData() {
   if (!selectedPermats.value.length || !selectedMonthStore.selectedMonth) {
     return
@@ -133,15 +137,34 @@ async function loadCalendarData() {
   const startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
   const endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0)
 
-  try {
-    await calendarStore.fetchCalendar(selectedPermats.value, startDate, endDate)
-  } catch (error) {
-    console.error('Erreur lors du chargement des données du calendrier:', error)
-  }
+  await calendarStore.fetchCalendar(selectedPermats.value, startDate, endDate)
 }
 
-function getUserData(permatNumber, dataType) {
+/**
+ * Construit l'URL de la photo avec validation
+ * @param {string} photoPath - Chemin de la photo
+ * @returns {string|null}
+ */
+function getPhotoUrl(photoPath) {
+  return buildPhotoUrl(photoPath)
+}
 
+/**
+ * Gestion des erreurs de chargement d'image
+ * @param {Event} event - Événement d'erreur
+ */
+function onImageError(event) {
+  // Masquer l'image en cas d'erreur de chargement
+  event.target.style.display = 'none'
+}
+
+/**
+ * Récupère une donnée utilisateur depuis le store
+ * @param {number} permatNumber - Identifiant de l'employé
+ * @param {string} dataType - Type de donnée à récupérer
+ * @returns {number|string}
+ */
+function getUserData(permatNumber, dataType) {
   // Si les données ne sont pas chargées, retourner '?'
   if (!calendarStore.hasData) {
     return '?'
@@ -162,15 +185,25 @@ function getUserData(permatNumber, dataType) {
   return getter ? getter() : '?'
 }
 
+/**
+ * Détermine la classe CSS selon le taux de présence
+ * @param {number} rate - Taux de présence
+ * @returns {string}
+ */
 function getRateClass(rate) {
-  if (rate < 40) return 'rate-low';
-  if (rate >= 40 && rate < 50) return 'rate-medium';
-  return 'rate-high';
+  if (rate < 40) return 'rate-low'
+  if (rate >= 40 && rate < 50) return 'rate-medium'
+  return 'rate-high'
 }
 
+/**
+ * Détermine la classe CSS selon le nombre d'erreurs
+ * @param {number} errors - Nombre d'erreurs
+ * @returns {string}
+ */
 function getErrorClass(errors) {
-  if (errors > 0) return 'there-are-errors';
-  return 'there-are-no-errors';
+  if (errors > 0) return 'there-are-errors'
+  return 'there-are-no-errors'
 }
 
 // Watcher pour mettre une sélection par défaut sur le premier calendrier
@@ -181,7 +214,7 @@ watch(
         agendaStore.setAgenda(newAgendas[0].id)
       }
     },
-    {immediate: true}
+    { immediate: true }
 )
 
 // Watcher principal pour charger les données quand l'agenda, les utilisateurs ou le mois change
@@ -194,12 +227,13 @@ watch(
     () => {
       loadCalendarData()
     },
-    {
-      immediate: true,
-      deep: true
-    }
+    { immediate: true }
 )
 
+/**
+ * Gestion du changement d'agenda
+ * @param {Event} e - Événement de changement
+ */
 function onChange(e) {
   agendaStore.setAgenda(e.target.value)
 }
