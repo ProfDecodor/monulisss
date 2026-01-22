@@ -119,6 +119,46 @@ npm run preview  # Prévisualisation du build
 3. Cliquer sur **"Charger l'extension non empaquetée"**
 4. Sélectionner le dossier `dist/`
 
+### Mode debug
+
+Un mode debug est disponible pour visualiser tous les appels API effectués par l'extension et leurs réponses.
+
+#### Activation
+
+Dans `src/constants.js`, modifier la constante `DEBUG_MODE` :
+
+```js
+export const DEBUG_MODE = true
+```
+
+#### Consultation des logs
+
+Les logs apparaissent dans la **console de l'onglet myUlis** (pas celle de l'extension). Pour y accéder :
+
+1. Ouvrir les DevTools sur l'onglet myulis.etnic.be (`F12` ou `Ctrl+Shift+I`)
+2. Aller dans l'onglet **Console**
+3. Les logs sont groupés et pliables, avec le préfixe `[MonUlisss API ...]`
+
+#### Format des logs
+
+```
+▸ [MonUlisss API REQUEST] https://myulis.etnic.be/api/data
+    Timestamp: 2024-01-15T10:30:00.000Z
+    URL: https://myulis.etnic.be/api/data
+    Data: { method: 'POST', body: '{"types":["POINTAGES"],...}' }
+
+▸ [MonUlisss API RESPONSE] https://myulis.etnic.be/api/data
+    Timestamp: 2024-01-15T10:30:01.234Z
+    URL: https://myulis.etnic.be/api/data
+    Data: { status: 200, data: [...] }
+```
+
+Les types de logs disponibles :
+- `REQUEST` : Détails de la requête (méthode, body)
+- `RESPONSE` : Statut HTTP et données reçues
+- `RESPONSE_DATA` : Données JSON parsées (pour les appels calendar)
+- `ERROR` : Erreurs rencontrées (avec numéro de tentative)
+
 ## Comment contribuer
 
 Ce projet est ouvert aux contributions des collègues du département développement de l'ETNIC.
@@ -174,11 +214,12 @@ Contactez julian.davreux@etnic.be; n'ouvrez pas une **Issue** sur GitHub ni un t
 
 ## Changelog
 
-### v0.8.3
+### v0.8.4 (à venir)
 - Optimisation des calculs de présence (mise en cache)
 - Ajout du retry automatique pour les appels API
 - Parallélisation du chargement des données
 - Refactorisation du code (constantes, composables)
+- Mode debug
 
 ## Licence
 

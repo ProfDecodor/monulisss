@@ -4,7 +4,8 @@ import {
   API_USER_ENDPOINT,
   API_AGENDAS_ENDPOINT,
   EXCLUDED_AGENDA_MODE,
-  RETRY_CONFIG
+  RETRY_CONFIG,
+  DEBUG_MODE
 } from '@/constants'
 
 export const useUserStore = defineStore('user', {
@@ -77,8 +78,19 @@ export const useUserStore = defineStore('user', {
       try {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, retryConfig) => {
+          func: (apiUrl, retryConfig, debugMode) => {
             return (async () => {
+              // Fonction de log pour le debug
+              function debugLog(type, url, data) {
+                if (!debugMode) return
+                const timestamp = new Date().toISOString()
+                console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+                console.log('Timestamp:', timestamp)
+                console.log('URL:', url)
+                console.log('Data:', data)
+                console.groupEnd()
+              }
+
               // Fonction de fetch avec retry (doit être définie dans le contexte injecté)
               async function fetchWithRetry(url, options) {
                 const headers = {
@@ -88,6 +100,8 @@ export const useUserStore = defineStore('user', {
 
                 let lastError
                 const { MAX_ATTEMPTS, BASE_DELAY_MS, BACKOFF_FACTOR } = retryConfig
+
+                debugLog('REQUEST', url, { method: options.method || 'GET' })
 
                 for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
                   try {
@@ -99,9 +113,12 @@ export const useUserStore = defineStore('user', {
                     if (!response.ok) {
                       throw new Error(`HTTP ${response.status}`)
                     }
-                    return await response.json()
+                    const jsonData = await response.json()
+                    debugLog('RESPONSE', url, { status: response.status, data: jsonData })
+                    return jsonData
                   } catch (error) {
                     lastError = error
+                    debugLog('ERROR', url, { error: error.message, attempt })
                     if (attempt === MAX_ATTEMPTS) break
 
                     const delay = BASE_DELAY_MS * Math.pow(BACKOFF_FACTOR, attempt - 1)
@@ -123,7 +140,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_USER_ENDPOINT, RETRY_CONFIG]
+          args: [API_USER_ENDPOINT, RETRY_CONFIG, DEBUG_MODE]
         })
 
         if (result.result?.error) {
@@ -155,8 +172,19 @@ export const useUserStore = defineStore('user', {
       try {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, excludedMode, retryConfig) => {
+          func: (apiUrl, excludedMode, retryConfig, debugMode) => {
             return (async () => {
+              // Fonction de log pour le debug
+              function debugLog(type, url, data) {
+                if (!debugMode) return
+                const timestamp = new Date().toISOString()
+                console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+                console.log('Timestamp:', timestamp)
+                console.log('URL:', url)
+                console.log('Data:', data)
+                console.groupEnd()
+              }
+
               // Fonction de fetch avec retry
               async function fetchWithRetry(url, options) {
                 const headers = {
@@ -166,6 +194,8 @@ export const useUserStore = defineStore('user', {
 
                 let lastError
                 const { MAX_ATTEMPTS, BASE_DELAY_MS, BACKOFF_FACTOR } = retryConfig
+
+                debugLog('REQUEST', url, { method: options.method || 'GET' })
 
                 for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
                   try {
@@ -177,9 +207,12 @@ export const useUserStore = defineStore('user', {
                     if (!response.ok) {
                       throw new Error(`HTTP ${response.status}`)
                     }
-                    return await response.json()
+                    const jsonData = await response.json()
+                    debugLog('RESPONSE', url, { status: response.status, data: jsonData })
+                    return jsonData
                   } catch (error) {
                     lastError = error
+                    debugLog('ERROR', url, { error: error.message, attempt })
                     if (attempt === MAX_ATTEMPTS) break
 
                     const delay = BASE_DELAY_MS * Math.pow(BACKOFF_FACTOR, attempt - 1)
@@ -203,7 +236,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG]
+          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG, DEBUG_MODE]
         })
 
         if (result.result?.error) {

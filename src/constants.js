@@ -3,6 +3,9 @@
  * Centralise tous les codes utilisés par l'API myUlis
  */
 
+// Mode debug - Active les logs des appels API dans la console
+export const DEBUG_MODE = false
+
 // URL de base de l'API myUlis
 export const API_BASE_URL = 'https://myulis.etnic.be'
 export const API_DATA_ENDPOINT = `${API_BASE_URL}/api/data`

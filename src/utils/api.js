@@ -3,7 +3,26 @@
  * Inclut la logique de retry avec backoff exponentiel
  */
 
-import { RETRY_CONFIG, API_HEADERS, API_BASE_URL } from '@/constants'
+import { RETRY_CONFIG, API_HEADERS, API_BASE_URL, DEBUG_MODE } from '@/constants'
+
+/**
+ * Log un appel API dans la console si le mode debug est activé
+ * @param {string} type - 'REQUEST' ou 'RESPONSE'
+ * @param {string} url - URL de l'appel
+ * @param {Object} data - Données à logger
+ */
+function debugLog(type, url, data) {
+  if (!DEBUG_MODE) return
+
+  const timestamp = new Date().toISOString()
+  const prefix = `[MonUlisss API ${type}]`
+
+  console.groupCollapsed(`${prefix} ${url}`)
+  console.log('Timestamp:', timestamp)
+  console.log('URL:', url)
+  console.log('Data:', data)
+  console.groupEnd()
+}
 
 /**
  * Effectue un appel fetch avec retry et backoff exponentiel
@@ -21,6 +40,8 @@ export async function fetchWithRetry(
 ) {
   let lastError
 
+  debugLog('REQUEST', url, { method: options.method || 'GET', body: options.body, attempt: 1 })
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const response = await fetch(url, {
@@ -33,9 +54,12 @@ export async function fetchWithRetry(
         throw new Error(`HTTP ${response.status}`)
       }
 
+      debugLog('RESPONSE', url, { status: response.status, attempt })
+
       return response
     } catch (error) {
       lastError = error
+      debugLog('ERROR', url, { error: error.message, attempt })
 
       // Ne pas réessayer si c'est la dernière tentative
       if (attempt === maxAttempts) {

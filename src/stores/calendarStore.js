@@ -4,7 +4,8 @@ import { usePresenceCalculator } from '@/composables/usePresenceCalculator'
 import {
   API_DATA_ENDPOINT,
   DATA_TYPES,
-  RETRY_CONFIG
+  RETRY_CONFIG,
+  DEBUG_MODE
 } from '@/constants'
 
 // Instance partagée du calculateur de présence
@@ -72,7 +73,7 @@ export const useCalendarStore = defineStore('calendar', {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
           func: this._createFetchFunction(),
-          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG]
+          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG, DEBUG_MODE]
         })
 
         if (result.result?.error) {
@@ -97,12 +98,25 @@ export const useCalendarStore = defineStore('calendar', {
      * Factorisée avec retry et appels parallèles
      */
     _createFetchFunction() {
-      return (apiUrl, permats, dd, df, dataTypes, retryConfig) => {
+      return (apiUrl, permats, dd, df, dataTypes, retryConfig, debugMode) => {
         return (async () => {
           const headers = {
             'Content-Type': 'application/json',
             'Referer': 'https://myulis.etnic.be/',
             'Origin': 'https://myulis.etnic.be'
+          }
+
+          /**
+           * Fonction de log pour le debug
+           */
+          function debugLog(type, url, data) {
+            if (!debugMode) return
+            const timestamp = new Date().toISOString()
+            console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+            console.log('Timestamp:', timestamp)
+            console.log('URL:', url)
+            console.log('Data:', data)
+            console.groupEnd()
           }
 
           /**
@@ -112,15 +126,19 @@ export const useCalendarStore = defineStore('calendar', {
             let lastError
             const { MAX_ATTEMPTS, BASE_DELAY_MS, BACKOFF_FACTOR } = retryConfig
 
+            debugLog('REQUEST', url, { method: options.method || 'GET', body: options.body })
+
             for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
               try {
                 const response = await fetch(url, options)
                 if (!response.ok) {
                   throw new Error(`HTTP ${response.status}`)
                 }
+                debugLog('RESPONSE', url, { status: response.status, attempt })
                 return response
               } catch (error) {
                 lastError = error
+                debugLog('ERROR', url, { error: error.message, attempt })
                 if (attempt === MAX_ATTEMPTS) break
 
                 const delay = BASE_DELAY_MS * Math.pow(BACKOFF_FACTOR, attempt - 1)
@@ -141,7 +159,9 @@ export const useCalendarStore = defineStore('calendar', {
               credentials: 'include',
               headers
             })
-            return response.json()
+            const jsonData = await response.json()
+            debugLog('RESPONSE_DATA', `${apiUrl} [${type}]`, jsonData)
+            return jsonData
           }
 
           try {
