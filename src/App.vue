@@ -1,5 +1,5 @@
 <template>
-  <div class="p-3">
+  <div class="p-3" :class="{ 'ugly-mode': uglyMode }">
     <!-- Si on est sur myulis -->
     <div v-if="tabStore.isOnMyulis">
       <div v-if="userStore.loading">
@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import IdentityInfo from './components/IdentityInfo.vue'
 import PresenceInfo from './components/PresenceInfo.vue'
 import PresenceInfoDetail from './components/PresenceInfoDetail.vue'
@@ -72,11 +72,17 @@ import MonthSelector from './components/MonthSelector.vue'
 import AgendaSelector from "./components/AgendaSelector.vue";
 import { useUserStore } from './stores/userStore'
 import { useTabStore } from './stores/tabStore'
+import { isUglyModeEnabled } from './utils/settings'
 
 const userStore = useUserStore()
 const tabStore = useTabStore()
+const uglyMode = ref(false)
 
 onMounted(async () => {
+  uglyMode.value = await isUglyModeEnabled()
+  if (uglyMode.value) {
+    document.body.classList.add('ugly-mode')
+  }
   await tabStore.getActiveTab()
   if (tabStore.isOnMyulis) {
     await userStore.fetchUserData()
@@ -90,3 +96,4 @@ watch(() => tabStore.isOnMyulis, async (isOnMyulis) => {
   }
 })
 </script>
+

@@ -3,7 +3,8 @@
  * Inclut la logique de retry avec backoff exponentiel
  */
 
-import { RETRY_CONFIG, API_HEADERS, API_BASE_URL, DEBUG_MODE } from '@/constants'
+import { RETRY_CONFIG, API_HEADERS, API_BASE_URL } from '@/constants'
+import { isDebugEnabled } from '@/utils/settings'
 
 /**
  * Log un appel API dans la console si le mode debug est activé
@@ -11,9 +12,10 @@ import { RETRY_CONFIG, API_HEADERS, API_BASE_URL, DEBUG_MODE } from '@/constants
  * @param {string} url - URL de l'appel
  * @param {Object} data - Données à logger
  * @param {string} source - Fichier/module source de l'appel
+ * @param {boolean} debugMode - État du mode debug
  */
-function debugLog(type, url, data, source = 'api.js') {
-  if (!DEBUG_MODE) return
+function debugLog(type, url, data, source = 'api.js', debugMode = false) {
+  if (!debugMode) return
 
   const timestamp = new Date().toISOString()
   const prefix = `[MonUlisss ${source}] [${type}]`
@@ -40,9 +42,10 @@ export async function fetchWithRetry(
   maxAttempts = RETRY_CONFIG.MAX_ATTEMPTS,
   baseDelay = RETRY_CONFIG.BASE_DELAY_MS
 ) {
+  const debugMode = await isDebugEnabled()
   let lastError
 
-  debugLog('REQUEST', url, { method: options.method || 'GET', body: options.body, attempt: 1 })
+  debugLog('REQUEST', url, { method: options.method || 'GET', body: options.body, attempt: 1 }, 'api.js', debugMode)
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
@@ -56,12 +59,12 @@ export async function fetchWithRetry(
         throw new Error(`HTTP ${response.status}`)
       }
 
-      debugLog('RESPONSE', url, { status: response.status, attempt })
+      debugLog('RESPONSE', url, { status: response.status, attempt }, 'api.js', debugMode)
 
       return response
     } catch (error) {
       lastError = error
-      debugLog('ERROR', url, { error: error.message, attempt })
+      debugLog('ERROR', url, { error: error.message, attempt }, 'api.js', debugMode)
 
       // Ne pas réessayer si c'est la dernière tentative
       if (attempt === maxAttempts) {

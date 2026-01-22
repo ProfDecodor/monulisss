@@ -4,9 +4,9 @@ import {
   API_USER_ENDPOINT,
   API_AGENDAS_ENDPOINT,
   EXCLUDED_AGENDA_MODE,
-  RETRY_CONFIG,
-  DEBUG_MODE
+  RETRY_CONFIG
 } from '@/constants'
+import { isDebugEnabled } from '@/utils/settings'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -76,13 +76,14 @@ export const useUserStore = defineStore('user', {
       this.error = null
 
       try {
+        const debugMode = await isDebugEnabled()
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, retryConfig, debugMode, source) => {
+          func: (apiUrl, retryConfig, debugModeValue, source) => {
             return (async () => {
               // Fonction de log pour le debug
               function debugLog(type, url, data) {
-                if (!debugMode) return
+                if (!debugModeValue) return
                 const timestamp = new Date().toISOString()
                 console.groupCollapsed(`[MonUlisss ${source}] [${type}] ${url}`)
                 console.log('Source:', source)
@@ -141,7 +142,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_USER_ENDPOINT, RETRY_CONFIG, DEBUG_MODE, 'userStore.fetchIdentity']
+          args: [API_USER_ENDPOINT, RETRY_CONFIG, debugMode, 'userStore.fetchIdentity']
         })
 
         if (result.result?.error) {
@@ -171,13 +172,14 @@ export const useUserStore = defineStore('user', {
       this.agendasError = null
 
       try {
+        const debugMode = await isDebugEnabled()
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, excludedMode, retryConfig, debugMode, source) => {
+          func: (apiUrl, excludedMode, retryConfig, debugModeValue, source) => {
             return (async () => {
               // Fonction de log pour le debug
               function debugLog(type, url, data) {
-                if (!debugMode) return
+                if (!debugModeValue) return
                 const timestamp = new Date().toISOString()
                 console.groupCollapsed(`[MonUlisss ${source}] [${type}] ${url}`)
                 console.log('Source:', source)
@@ -238,7 +240,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG, DEBUG_MODE, 'userStore.fetchAgendas']
+          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG, debugMode, 'userStore.fetchAgendas']
         })
 
         if (result.result?.error) {

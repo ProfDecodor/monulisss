@@ -4,9 +4,9 @@ import { usePresenceCalculator } from '@/composables/usePresenceCalculator'
 import {
   API_DATA_ENDPOINT,
   DATA_TYPES,
-  RETRY_CONFIG,
-  DEBUG_MODE
+  RETRY_CONFIG
 } from '@/constants'
+import { isDebugEnabled } from '@/utils/settings'
 
 // Instance partagée du calculateur de présence
 const presenceCalculator = usePresenceCalculator()
@@ -70,10 +70,11 @@ export const useCalendarStore = defineStore('calendar', {
       const df = adjustedEndDate.toLocaleDateString('fr-CA').split('T')[0]
 
       try {
+        const debugMode = await isDebugEnabled()
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
           func: this._createFetchFunction(),
-          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG, DEBUG_MODE, 'calendarStore.fetchCalendar']
+          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG, debugMode, 'calendarStore.fetchCalendar']
         })
 
         if (result.result?.error) {

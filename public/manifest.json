@@ -24,6 +24,9 @@
         "96": "icons/unicorn-96.png",
         "128": "icons/unicorn-128.png"
     },
-    "permissions": ["scripting","tabs","activeTab"],
+    "permissions": ["scripting","tabs","activeTab","storage"],
+    "options_ui": {
+      "page": "options.html"
+    },
     "host_permissions": ["https://myulis.etnic.be/*"]
   }
