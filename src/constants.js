@@ -44,7 +44,7 @@ export const EXCLUDED_ABSENCE_CODES = [
     'ETPEVE',     // ?
     'MALCER',     // Certificat médical, Certifical médical dans ta gueule #BustaBusty
     'ASPO',       // Absence sportive ou culturelle
-    'ASPO2'       // Absence sportive ou culturelle > limite (aucune idée de ce que ca veut dire)
+    'ASPO2'       // Absence sportive tu esou culturelle > limite (aucune idée de ce que ca veut dire)
 ]
 
 // Code de retour maladie (à soustraire des jours travaillés)

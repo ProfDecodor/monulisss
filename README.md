@@ -1,5 +1,20 @@
 # MonUlisss
 
+[![GitHub release](https://img.shields.io/github/v/release/ProfDecodor/monulisss?style=flat-square)](https://github.com/ProfDecodor/monulisss/releases)
+[![GitHub last commit](https://img.shields.io/github/last-commit/ProfDecodor/monulisss?style=flat-square)](https://github.com/ProfDecodor/monulisss/commits)
+[![GitHub issues](https://img.shields.io/github/issues/ProfDecodor/monulisss?style=flat-square)](https://github.com/ProfDecodor/monulisss/issues)
+[![License](https://img.shields.io/badge/license-TOKILL-blue?style=flat-square)](#licence)
+
+<div align="center">
+
+### 🦄 Version actuelle
+
+# `0.9.0` — *Cécémel revigorant*
+
+</div>
+
+---
+
 Extension de navigateur (Firefox/Chrome) pour extraire et visualiser les données de présence depuis **myUlis** (système RH de l'ETNIC).
 
 ## Fonctionnalités
@@ -226,9 +241,12 @@ Contactez julian.davreux@etnic.be; n'ouvrez pas une **Issue** sur GitHub ni un t
 
 ---
 
+<a id="changelog"></a>
 ## Changelog
 
-### v0.8.4 (à venir)
+### 0.9.0 "Cécémel revigorant" (2026-01-22)
+- les releases ont maintenant un nom de code basé sur un belgicisme ou une spécialité belge + un adjectif
+- ajouts d'options du plugin
 - ajout des codes : ASPO
 - Optimisation des calculs de présence (mise en cache)
 - Ajout du retry automatique pour les appels API
@@ -236,6 +254,72 @@ Contactez julian.davreux@etnic.be; n'ouvrez pas une **Issue** sur GitHub ni un t
 - Refactorisation du code (constantes, composables)
 - Mode debug
 - Refresh automatique après redirection vers MyUlis
+
+### 0.8.3 (2025-12-03)
+- Adaptations des appels suite aux changements de politiques API de MyUlis.
+
+### 0.8.2 (2025)
+- Encore des petits fixes
+
+### 0.8.1 (2025)
+- Petits fixes
+
+### 0.8.0 (2025)
+- Réécriture en Vue.js3
+
+### 0.7.5 (2024-11-10)
+- Possibilité de consulter les 6 derniers mois
+
+### 0.7.4 (2024-08-14)
+- Correction du comptage des congés qui recouvraient des jours non ouvrés (weekend, fériés etc)
+
+### 0.7.3 (2024-08-05)
+- Correction d'un bug survenant le 1er jour du mois
+- Prise en compte des codes MIS-IN et MIS-OUT
+- Prise en compte des codes 4/5 pour maladie
+- Exclusion pour le code ULIMIN, code inconnu qui pop sans explication
+
+### 0.7.2 (2024-06-18)
+- Correction d'un comportement sur le bouton download (encore)
+
+### 0.7.1 (2024-06-17)
+- Correction d'un comportement sur le bouton download
+
+### 0.7.0 (2024-06-17)
+- Refactoring majeur
+- Ajout des pointages invalides
+- Calcul par demi-journées
+
+### 0.6 (jamais)
+- Cette version n'a jamais existé. Jamais. Et ne posez pas de questions.
+
+### 0.6 (2024-03-24)
+- Ajout des codes de prestation "PRE", "MIE", "MIBE", "MIS" (et ses dérivés), "MIS1-HR", "FOR2"
+- Ajout des codes d'absence "CC02", "MIO02", "COET", "COF2", "CCFM", "COFM", "DISP", "CC04", "CSYN", "CC12"
+- Cosmétique : réduction de la taille des noms/prenoms
+
+### 0.5 (2024-03-13)
+- Ajout du ratio personnel pour le mois en cours
+- Ajout de l'identité
+- Ajout du sélecteur de calendrier
+
+### 0.4 (2024-03-05)
+- Sélecteur de mois affiche les noms des mois
+- Ajout des codes CC20, POI-IN, POI-OUT et FOR1 (formation)
+
+### 0.3 (2024-03-04)
+- Sélecteur de mois
+- Ajout d'un loader
+- Refactoring des méthodes d'affichage
+- Prise en compte des congés accompagnement de malade (CC20)
+- Correction : bug en cas de jours sans activité
+
+### 0.2 (2024-02-24)
+- Prise en compte des congés politiques
+
+### 0.1 (2024-02-26)
+- Première version déployée
+
 
 ## Licence
 
