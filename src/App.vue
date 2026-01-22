@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, watch } from 'vue'
 import IdentityInfo from './components/IdentityInfo.vue'
 import PresenceInfo from './components/PresenceInfo.vue'
 import PresenceInfoDetail from './components/PresenceInfoDetail.vue'
@@ -79,6 +79,13 @@ const tabStore = useTabStore()
 onMounted(async () => {
   await tabStore.getActiveTab()
   if (tabStore.isOnMyulis) {
+    await userStore.fetchUserData()
+  }
+})
+
+// Charger les données utilisateur après une redirection vers MyUlis
+watch(() => tabStore.isOnMyulis, async (isOnMyulis) => {
+  if (isOnMyulis && !userStore.user && !userStore.loading) {
     await userStore.fetchUserData()
   }
 })

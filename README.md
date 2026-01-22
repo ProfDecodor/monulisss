@@ -229,11 +229,13 @@ Contactez julian.davreux@etnic.be; n'ouvrez pas une **Issue** sur GitHub ni un t
 ## Changelog
 
 ### v0.8.4 (à venir)
+- ajout des codes : ASPO
 - Optimisation des calculs de présence (mise en cache)
 - Ajout du retry automatique pour les appels API
 - Parallélisation du chargement des données
 - Refactorisation du code (constantes, composables)
 - Mode debug
+- Refresh automatique après redirection vers MyUlis
 
 ## Licence
 
