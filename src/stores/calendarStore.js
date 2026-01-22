@@ -73,7 +73,7 @@ export const useCalendarStore = defineStore('calendar', {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
           func: this._createFetchFunction(),
-          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG, DEBUG_MODE]
+          args: [API_DATA_ENDPOINT, permats, dd, df, Object.values(DATA_TYPES), RETRY_CONFIG, DEBUG_MODE, 'calendarStore.fetchCalendar']
         })
 
         if (result.result?.error) {
@@ -98,7 +98,7 @@ export const useCalendarStore = defineStore('calendar', {
      * Factorisée avec retry et appels parallèles
      */
     _createFetchFunction() {
-      return (apiUrl, permats, dd, df, dataTypes, retryConfig, debugMode) => {
+      return (apiUrl, permats, dd, df, dataTypes, retryConfig, debugMode, source) => {
         return (async () => {
           const headers = {
             'Content-Type': 'application/json',
@@ -112,7 +112,8 @@ export const useCalendarStore = defineStore('calendar', {
           function debugLog(type, url, data) {
             if (!debugMode) return
             const timestamp = new Date().toISOString()
-            console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+            console.groupCollapsed(`[MonUlisss ${source}] [${type}] ${url}`)
+            console.log('Source:', source)
             console.log('Timestamp:', timestamp)
             console.log('URL:', url)
             console.log('Data:', data)

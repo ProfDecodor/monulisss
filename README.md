@@ -142,20 +142,34 @@ Les logs apparaissent dans la **console de l'onglet myUlis** (pas celle de l'ext
 #### Format des logs
 
 ```
-▸ [MonUlisss API REQUEST] https://myulis.etnic.be/api/data
+▸ [MonUlisss userStore.fetchIdentity] [REQUEST] https://myulis.etnic.be/api/user/me
+    Source: userStore.fetchIdentity
     Timestamp: 2024-01-15T10:30:00.000Z
+    URL: https://myulis.etnic.be/api/user/me
+    Data: { method: 'GET' }
+
+▸ [MonUlisss calendarStore.fetchCalendar] [REQUEST] https://myulis.etnic.be/api/data
+    Source: calendarStore.fetchCalendar
+    Timestamp: 2024-01-15T10:30:00.500Z
     URL: https://myulis.etnic.be/api/data
     Data: { method: 'POST', body: '{"types":["POINTAGES"],...}' }
 
-▸ [MonUlisss API RESPONSE] https://myulis.etnic.be/api/data
+▸ [MonUlisss calendarStore.fetchCalendar] [RESPONSE] https://myulis.etnic.be/api/data
+    Source: calendarStore.fetchCalendar
     Timestamp: 2024-01-15T10:30:01.234Z
     URL: https://myulis.etnic.be/api/data
-    Data: { status: 200, data: [...] }
+    Data: { status: 200, attempt: 1 }
 ```
+
+Les sources possibles :
+- `userStore.fetchIdentity` : Récupération de l'identité utilisateur
+- `userStore.fetchAgendas` : Récupération des agendas
+- `calendarStore.fetchCalendar` : Récupération des données de calendrier
+- `api.js` : Appels directs via l'utilitaire API
 
 Les types de logs disponibles :
 - `REQUEST` : Détails de la requête (méthode, body)
-- `RESPONSE` : Statut HTTP et données reçues
+- `RESPONSE` : Statut HTTP et numéro de tentative
 - `RESPONSE_DATA` : Données JSON parsées (pour les appels calendar)
 - `ERROR` : Erreurs rencontrées (avec numéro de tentative)
 

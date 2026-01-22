@@ -78,13 +78,14 @@ export const useUserStore = defineStore('user', {
       try {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, retryConfig, debugMode) => {
+          func: (apiUrl, retryConfig, debugMode, source) => {
             return (async () => {
               // Fonction de log pour le debug
               function debugLog(type, url, data) {
                 if (!debugMode) return
                 const timestamp = new Date().toISOString()
-                console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+                console.groupCollapsed(`[MonUlisss ${source}] [${type}] ${url}`)
+                console.log('Source:', source)
                 console.log('Timestamp:', timestamp)
                 console.log('URL:', url)
                 console.log('Data:', data)
@@ -140,7 +141,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_USER_ENDPOINT, RETRY_CONFIG, DEBUG_MODE]
+          args: [API_USER_ENDPOINT, RETRY_CONFIG, DEBUG_MODE, 'userStore.fetchIdentity']
         })
 
         if (result.result?.error) {
@@ -172,13 +173,14 @@ export const useUserStore = defineStore('user', {
       try {
         const [result] = await chrome.scripting.executeScript({
           target: { tabId: tabStore.currentTabId },
-          func: (apiUrl, excludedMode, retryConfig, debugMode) => {
+          func: (apiUrl, excludedMode, retryConfig, debugMode, source) => {
             return (async () => {
               // Fonction de log pour le debug
               function debugLog(type, url, data) {
                 if (!debugMode) return
                 const timestamp = new Date().toISOString()
-                console.groupCollapsed(`[MonUlisss API ${type}] ${url}`)
+                console.groupCollapsed(`[MonUlisss ${source}] [${type}] ${url}`)
+                console.log('Source:', source)
                 console.log('Timestamp:', timestamp)
                 console.log('URL:', url)
                 console.log('Data:', data)
@@ -236,7 +238,7 @@ export const useUserStore = defineStore('user', {
               }
             })()
           },
-          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG, DEBUG_MODE]
+          args: [API_AGENDAS_ENDPOINT, EXCLUDED_AGENDA_MODE, RETRY_CONFIG, DEBUG_MODE, 'userStore.fetchAgendas']
         })
 
         if (result.result?.error) {

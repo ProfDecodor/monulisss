@@ -7,17 +7,19 @@ import { RETRY_CONFIG, API_HEADERS, API_BASE_URL, DEBUG_MODE } from '@/constants
 
 /**
  * Log un appel API dans la console si le mode debug est activé
- * @param {string} type - 'REQUEST' ou 'RESPONSE'
+ * @param {string} type - 'REQUEST', 'RESPONSE' ou 'ERROR'
  * @param {string} url - URL de l'appel
  * @param {Object} data - Données à logger
+ * @param {string} source - Fichier/module source de l'appel
  */
-function debugLog(type, url, data) {
+function debugLog(type, url, data, source = 'api.js') {
   if (!DEBUG_MODE) return
 
   const timestamp = new Date().toISOString()
-  const prefix = `[MonUlisss API ${type}]`
+  const prefix = `[MonUlisss ${source}] [${type}]`
 
   console.groupCollapsed(`${prefix} ${url}`)
+  console.log('Source:', source)
   console.log('Timestamp:', timestamp)
   console.log('URL:', url)
   console.log('Data:', data)
