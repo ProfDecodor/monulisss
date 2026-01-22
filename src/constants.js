@@ -40,7 +40,12 @@ export const CLOCK_IN_CODES = ['POI-IN', 'MIS-IN']
 export const CLOCK_OUT_CODES = ['POI-OUT', 'MIS-OUT']
 
 // Codes d'absence à exclure du calcul des jours travaillés (temps partiel)
-export const EXCLUDED_ABSENCE_CODES = ['ETPEVE', 'MALCER']
+export const EXCLUDED_ABSENCE_CODES = [
+    'ETPEVE',     // ?
+    'MALCER',     // Certificat médical, Certifical médical dans ta gueule #BustaBusty
+    'ASPO',       // Absence sportive ou culturelle
+    'ASPO2'       // Absence sportiveou culturelle > limite (aucune idée de ce que ca veut dire)
+]
 
 // Code de retour maladie (à soustraire des jours travaillés)
 export const SICK_RETURN_CODE = 'RETM'

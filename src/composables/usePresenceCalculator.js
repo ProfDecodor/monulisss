@@ -141,8 +141,9 @@ export function usePresenceCalculator() {
         let leaveHours = 0
         for (const absence of data.absences) {
           if (
-            absence.category === LEAVE_CATEGORY &&
-            !EXCLUDED_ABSENCE_CODES.includes(absence.lid?.TYPE)
+              (absence.category === LEAVE_CATEGORY && !EXCLUDED_ABSENCE_CODES.includes(absence.lid?.TYPE))
+              &&
+              (!EXCLUDED_ABSENCE_CODES.includes(absence.dossier.nature.code))
           ) {
             leaveHours += calculateDurationHours(
               absence.computedStartTime,
