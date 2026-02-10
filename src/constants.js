@@ -39,12 +39,12 @@ export const PRESENCE_CODES = [
 export const CLOCK_IN_CODES = ['POI-IN', 'MIS-IN']
 export const CLOCK_OUT_CODES = ['POI-OUT', 'MIS-OUT']
 
-// Codes d'absence à exclure du calcul des jours travaillés (temps partiel)
+// Codes d'absence à exclure du calcul des jours travaillés (temps partiel et autres)
 export const EXCLUDED_ABSENCE_CODES = [
     'ETPEVE',     // ?
     'MALCER',     // Certificat médical, Certifical médical dans ta gueule #BustaBusty
     'ASPO',       // Absence sportive ou culturelle
-    'ASPO2'       // Absence sportive tu esou culturelle > limite (aucune idée de ce que ca veut dire)
+    'ASPO2'      // Absence sportive tu esou culturelle > limite (aucune idée de ce que ca veut dire)
 ]
 
 // Code de retour maladie (à soustraire des jours travaillés)
@@ -56,6 +56,11 @@ export const LEAVE_CATEGORY = 'CONGE'
 // Code spécial pour les fermetures (jour considéré comme ouvré malgré FERMETURE)
 // Ce code a poppé une fois chez Stéphane et je ne l'ai jamais revu par la suite.
 export const SPECIAL_OPENING_CODE = 'ULIMIN'
+
+// Codes de pointage qui indiquent un jour de fermeture (pas un jour ouvré)
+export const CLOSING_POINTAGE_CODES = [
+  'SNIC'       // Dispense Saint Nicolas
+]
 
 // Mode d'agenda à exclure
 export const EXCLUDED_AGENDA_MODE = 'calendarDiscreet'

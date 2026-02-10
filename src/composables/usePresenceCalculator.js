@@ -13,6 +13,7 @@ import {
   SICK_RETURN_CODE,
   LEAVE_CATEGORY,
   SPECIAL_OPENING_CODE,
+  CLOSING_POINTAGE_CODES,
   DURATION_THRESHOLDS
 } from '@/constants'
 import { calculateDurationHours, hoursToDayFraction } from '@/utils/api'
@@ -46,21 +47,29 @@ export function usePresenceCalculator() {
   function isOpeningDay(permat, day) {
     if (!calendarData.value) return true
 
+    let fermetureResult = null
+
     for (const calendar of calendarData.value) {
       for (const event of calendar) {
+        if (event.permat !== permat || event.day !== day) continue
+
+        // Jour avec uniquement des pointages de fermeture (ex: SNIC = Dispense Saint Nicolas)
         if (
-          event.type === DATA_TYPES.FERMETURE &&
-          event.permat === permat &&
-          event.day === day
+          event.type === DATA_TYPES.POINTAGES &&
+          event.payload?.pointages?.length > 0 &&
+          event.payload.pointages.every(p => CLOSING_POINTAGE_CODES.includes(p.nature?.code))
         ) {
-          // Prise en compte du code ULIMIN (jour ouvré malgré fermeture)
-          if (!event.payload || event.payload.code === SPECIAL_OPENING_CODE) {
-            return true
-          }
           return false
+        }
+
+        if (event.type === DATA_TYPES.FERMETURE) {
+          // Prise en compte du code ULIMIN (jour ouvré malgré fermeture)
+          fermetureResult = !event.payload || event.payload.code === SPECIAL_OPENING_CODE
         }
       }
     }
+
+    if (fermetureResult !== null) return fermetureResult
     return true
   }
 
