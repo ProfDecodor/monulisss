@@ -204,6 +204,11 @@ Contactez [julian.davreux@etnic.be](mailto:julian.davreux@etnic.be)
 
 ## Changelog
 
+### 0.9.1 "Cuberdon sucré" (à paraitre)
+
+* ajout de codes : SNIC (absence St Nicolas, oui ca existe)
+* changement du mode de calcul des jours ouvrés
+
 ### 0.9.0 "Cécémel revigorant" (2026-01-22)
 
 * Les releases ont maintenant un nom de code basé sur un belgicisme ou une spécialité belge + un adjectif

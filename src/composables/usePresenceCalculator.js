@@ -9,9 +9,6 @@ import {
   PRESENCE_CODES,
   CLOCK_IN_CODES,
   CLOCK_OUT_CODES,
-  EXCLUDED_ABSENCE_CODES,
-  SICK_RETURN_CODE,
-  LEAVE_CATEGORY,
   SPECIAL_OPENING_CODE,
   CLOSING_POINTAGE_CODES,
   DURATION_THRESHOLDS
@@ -130,7 +127,6 @@ export function usePresenceCalculator() {
 
     // Deuxième passe : calculer les métriques
     let presenceDays = 0
-    let workingDays = 0
     let homeworkingDays = 0
     let invalidActivities = 0
 
@@ -140,36 +136,6 @@ export function usePresenceCalculator() {
       // Comptage des erreurs
       if (data.isInvalid) {
         invalidActivities++
-      }
-
-      // Calcul des jours travaillés
-      if (data.pointages.length > 0) {
-        workingDays++
-
-        // Soustraction des congés
-        let leaveHours = 0
-        for (const absence of data.absences) {
-          if (
-              (absence.category === LEAVE_CATEGORY && !EXCLUDED_ABSENCE_CODES.includes(absence.lid?.TYPE))
-              &&
-              (!EXCLUDED_ABSENCE_CODES.includes(absence.dossier.nature.code))
-          ) {
-            leaveHours += calculateDurationHours(
-              absence.computedStartTime,
-              absence.computedEndTime
-            )
-          }
-        }
-        workingDays -= hoursToDayFraction(leaveHours)
-
-        // Soustraction des retours maladie
-        let sickReturnHours = 0
-        for (const pointage of data.pointages) {
-          if (pointage.nature?.code === SICK_RETURN_CODE) {
-            sickReturnHours += calculateDurationHours(pointage.in, pointage.out)
-          }
-        }
-        workingDays -= hoursToDayFraction(sickReturnHours)
       }
 
       // Calcul des jours de présence et télétravail
@@ -204,6 +170,9 @@ export function usePresenceCalculator() {
       presenceDays += Math.min(dayPresence, 1) // Max 1 jour par jour
       homeworkingDays += dayHomeworking
     }
+
+    // workingDays = total des jours réellement travaillés (présentiel + télétravail)
+    const workingDays = presenceDays + homeworkingDays
 
     // Stocker en cache
     const metrics = {
