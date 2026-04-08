@@ -129,15 +129,11 @@ const selectedPermats = computed(() => {
  * Charge les données du calendrier pour les utilisateurs sélectionnés
  */
 async function loadCalendarData() {
-  if (!selectedPermats.value.length || !selectedMonthStore.selectedMonth) {
+  if (!selectedPermats.value.length) {
     return
   }
 
-  const selectedDate = new Date(selectedMonthStore.selectedMonth)
-  const startDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1)
-  const endDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0)
-
-  await calendarStore.fetchCalendar(selectedPermats.value, startDate, endDate)
+  await calendarStore.fetchCalendar(selectedPermats.value, selectedMonthStore.startDate, selectedMonthStore.endDate)
 }
 
 /**
@@ -217,12 +213,13 @@ watch(
     { immediate: true }
 )
 
-// Watcher principal pour charger les données quand l'agenda, les utilisateurs ou le mois change
+// Watcher principal pour charger les données quand l'agenda, les utilisateurs ou la période change
 watch(
     [
       () => agendaStore.selectedAgenda,
       () => selectedPermats.value,
-      () => selectedMonthStore.selectedMonth
+      () => selectedMonthStore.startDate,
+      () => selectedMonthStore.endDate
     ],
     () => {
       loadCalendarData()
