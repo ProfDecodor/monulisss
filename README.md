@@ -7,7 +7,7 @@
 
 ### 🦄 Version actuelle
 
-# `0.9.0` — *Cécémel revigorant*
+# `0.10.0` — *Cuberdon sucré*
 
 ---
 
@@ -204,7 +204,7 @@ Contactez [julian.davreux@etnic.be](mailto:julian.davreux@etnic.be)
 
 ## Changelog
 
-### 0.10.0 "Cuberdon sucré" (à paraitre)
+### 0.10.0 "Cuberdon sucré" (2026-04-13)
 
 * possibilité de consulter les données des 4 derniers trimestres (en plus des 12 derniers mois)
 * ajout de codes : SNIC (absence St Nicolas, oui ca existe)
